@@ -31,7 +31,7 @@ class Wallet
         $account = $event->sender;
 
         if ($account instanceof Account) {
-            $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI]);
+            $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
 
             $response = $httpClient->request('POST', Endpoints::ENDPOINT_WALLET, [
                 RequestOptions::JSON => ['accountId' => $account->guid]
@@ -41,9 +41,12 @@ class Wallet
                 $body = json_decode($response->getBody()->getContents());
                 $account->updateAttributes(['ethereum_address' => $body->address]);
                 $account->mnemonic = $body->mnemonic;
+            } else {
+                $account->addError(
+                    'ethereum_address',
+                    "Sorry, we're facing some problems while creating you're ethereum wallet. We will fix this ASAP !"
+                );
             }
-
-            $account->addError('ethereum_address');
         }
     }
 }

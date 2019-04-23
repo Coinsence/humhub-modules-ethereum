@@ -17,7 +17,7 @@ return [
     'events' => [
         [
             'class' => Account::class,
-            'event' => ActiveRecord::EVENT_AFTER_INSERT,
+            'event' => ActiveRecord::EVENT_BEFORE_VALIDATE,
             'callback' => ['humhub\modules\ethereum\calls\Wallet', 'createWallet']
         ],
     ],
