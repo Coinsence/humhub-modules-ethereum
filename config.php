@@ -8,6 +8,7 @@
  */
 
 use humhub\modules\xcoin\models\Account;
+use yii\db\ActiveRecord;
 
 return [
     'id' => 'ethereum',
@@ -16,7 +17,7 @@ return [
     'events' => [
         [
             'class' => Account::class,
-            'event' => Account::EVENT_AFTER_INSERT,
+            'event' => ActiveRecord::EVENT_AFTER_INSERT,
             'callback' => ['humhub\modules\ethereum\calls\Wallet', 'createWallet']
         ],
     ],

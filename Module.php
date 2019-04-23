@@ -9,9 +9,9 @@
 
 namespace humhub\modules\ethereum;
 
-use humhub\modules\content\components\ContentContainerModule;
+use \humhub\components\Module as BaseModule;
 
-class Module extends ContentContainerModule
+class Module extends BaseModule
 {
 
     public function disable()

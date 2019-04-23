@@ -22,8 +22,6 @@ use humhub\modules\xcoin\models\Account;
  */
 class Wallet
 {
-    const WALLET_CREATION_SUCCESS = 'walletCreationSuccess';
-
     /**
      * @param $event
      * @throws GuzzleException
@@ -44,6 +42,8 @@ class Wallet
                 $account->updateAttributes(['ethereum_address' => $body->address]);
                 $account->mnemonic = $body->mnemonic;
             }
+
+            $account->addError('ethereum_address');
         }
     }
 }
