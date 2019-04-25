@@ -36,6 +36,11 @@ return [
             'event' => 'transactionTypeIssue',
             'callback' => ['humhub\modules\ethereum\calls\Coin', 'mintCoin']
         ],
+        [
+            'class' => Transaction::class,
+            'event' => 'transactionTypeTransfer',
+            'callback' => ['humhub\modules\ethereum\calls\Coin', 'transferCoin']
+        ],
     ],
 ];
 

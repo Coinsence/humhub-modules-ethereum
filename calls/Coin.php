@@ -18,6 +18,7 @@ use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
 use humhub\modules\space\models\Space;
 use humhub\modules\xcoin\models\Account;
+use humhub\modules\xcoin\models\Asset;
 use humhub\modules\xcoin\models\Transaction;
 use yii\web\HttpException;
 
@@ -77,8 +78,12 @@ class Coin
 
         if ($transaction instanceof Transaction) {
 
+            $asset = Asset::findOne([
+                'id' => $transaction->asset_id
+            ]);
+
             $space = Space::findOne([
-                'id' => $transaction->getAsset()->one()->id
+                'id' => $asset->space_id
             ]);
 
             $recipientAccount = Account::findOne([
@@ -97,7 +102,7 @@ class Coin
                     'accountId' => $defaultAccount->guid,
                     'dao' => $space->dao_address,
                     'recipient' => $recipientAccount->ethereum_address,
-                    'amount' => $transaction->amount,
+                    'amount' => (int) $transaction->amount,
                 ]
             ]);
 
@@ -105,6 +110,53 @@ class Coin
                 throw new HttpException(
                     $response->getStatusCode(),
                     'Could not mint coins for this space, will fix this ASAP !'
+                );
+            }
+        }
+    }
+
+    /**
+     * @param $event
+     * @throws GuzzleException
+     * @throws HttpException
+     */
+    public static function transferCoin($event)
+    {
+        $transaction = $event->sender;
+
+        if ($transaction instanceof Transaction) {
+
+            $asset = Asset::findOne([
+                'id' => $transaction->asset_id
+            ]);
+
+            $space = Space::findOne([
+                'id' => $asset->space_id
+            ]);
+
+            $recipientAccount = Account::findOne([
+                'id' => $transaction->to_account_id,
+            ]);
+
+            $senderAccount = Account::findOne([
+                $transaction->from_account_id,
+            ]);
+
+            $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
+
+            $response = $httpClient->request('POST', Endpoints::ENDPOINT_COIN_TRANSFER, [
+                RequestOptions::JSON => [
+                    'accountId' => $senderAccount->guid,
+                    'dao' => $space->dao_address,
+                    'to' => $recipientAccount->ethereum_address,
+                    'amount' => (int) $transaction->amount,
+                ]
+            ]);
+
+            if ($response->getStatusCode() != HttpStatus::CREATED) {
+                throw new HttpException(
+                    $response->getStatusCode(),
+                    'Could not do transfer coins, will fix this ASAP !'
                 );
             }
         }

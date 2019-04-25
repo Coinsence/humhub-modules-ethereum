@@ -24,4 +24,5 @@ class Endpoints
     const ENDPOINT_DAO = '/dao';
     const ENDPOINT_COIN_ISSUE = '/coin/issue';
     const ENDPOINT_COIN_MINT = '/coin/mint';
+    const ENDPOINT_COIN_TRANSFER = '/coin/transfer';
 }
