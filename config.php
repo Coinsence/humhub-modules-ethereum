@@ -25,6 +25,11 @@ return [
             'event' => 'defaultSpaceAccountCreated',
             'callback' => ['humhub\modules\ethereum\calls\Dao', 'createDao']
         ],
+        [
+            'class' => Account::class,
+            'event' => 'defaultSpaceAccountCreated',
+            'callback' => ['humhub\modules\ethereum\calls\Coin', 'issueCoin']
+        ],
     ],
 ];
 
