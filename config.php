@@ -8,6 +8,7 @@
  */
 
 use humhub\modules\xcoin\models\Account;
+use humhub\modules\xcoin\models\Transaction;
 use yii\db\ActiveRecord;
 
 return [
@@ -29,6 +30,11 @@ return [
             'class' => Account::class,
             'event' => 'defaultSpaceAccountCreated',
             'callback' => ['humhub\modules\ethereum\calls\Coin', 'issueCoin']
+        ],
+        [
+            'class' => Transaction::class,
+            'event' => 'transactionTypeIssue',
+            'callback' => ['humhub\modules\ethereum\calls\Coin', 'mintCoin']
         ],
     ],
 ];
