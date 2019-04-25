@@ -20,6 +20,11 @@ return [
             'event' => ActiveRecord::EVENT_BEFORE_VALIDATE,
             'callback' => ['humhub\modules\ethereum\calls\Wallet', 'createWallet']
         ],
+        [
+            'class' => Account::class,
+            'event' => 'defaultSpaceAccountCreated',
+            'callback' => ['humhub\modules\ethereum\calls\Dao', 'createDao']
+        ],
     ],
 ];
 
