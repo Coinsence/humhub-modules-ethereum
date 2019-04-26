@@ -9,6 +9,10 @@
 
 namespace humhub\modules\ethereum\component;
 
+use humhub\components\Event;
+use humhub\modules\space\models\Space;
+use humhub\modules\xcoin\models\Account;
+
 /**
  * Class Utils
  *
@@ -37,5 +41,25 @@ class Utils
     public static function getDefaultDescHash()
     {
         return str_pad('0x', 66, "0", STR_PAD_RIGHT);
+    }
+
+    public static function createDefaultAccount($entity)
+    {
+        if ($entity instanceof Space) {
+
+                $account = new Account();
+                $account->title = 'Default';
+                $account->space_id = $entity->id;
+                $account->account_type = Account::TYPE_DEFAULT;
+                $account->save();
+
+                Event::trigger(Account::class, Account::EVENT_DEFAULT_SPACE_ACCOUNT_CREATED, new Event(['sender' => $entity]));
+        } else {
+                $account = new Account();
+                $account->title = 'Default';
+                $account->user_id = $entity->id;
+                $account->account_type = Account::TYPE_DEFAULT;
+                $account->save();
+        }
     }
 }

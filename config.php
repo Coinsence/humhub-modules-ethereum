@@ -7,6 +7,7 @@
  * @author Daly Ghaith <daly.ghaith@gmail.com>
  */
 
+use humhub\modules\space\models\Membership;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\xcoin\models\Transaction;
 use yii\db\ActiveRecord;
@@ -40,6 +41,16 @@ return [
             'class' => Transaction::class,
             'event' => 'transactionTypeTransfer',
             'callback' => ['humhub\modules\ethereum\calls\Coin', 'transferCoin']
+        ],
+        [
+            'class' => Membership::class,
+            'event' => 'memberAdded',
+            'callback' => ['humhub\modules\ethereum\calls\Space', 'addMember']
+        ],
+        [
+            'class' => Membership::class,
+            'event' => 'memberRemoved',
+            'callback' => ['humhub\modules\ethereum\calls\Space', 'leaveSpace']
         ],
     ],
 ];
