@@ -53,7 +53,6 @@ return [
             'event' => 'memberRemoved',
             'callback' => ['humhub\modules\ethereum\calls\Space', 'leaveSpace']
         ],
-
         [
             'class' => OverviewController::class,
             'event' => 'spaceIndex',
