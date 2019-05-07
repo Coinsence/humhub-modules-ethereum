@@ -31,6 +31,44 @@ class Space
      * @throws GuzzleException
      * @throws HttpException
      */
+    public static function details($event)
+    {
+        $space = $event->sender;
+
+        if (!$space->dao_address) {
+            return;
+        }
+
+        $spaceDefaultAccount = Account::findOne([
+            'space_id' => $space->id,
+            'account_type' => Account::TYPE_DEFAULT
+        ]);
+
+        $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
+
+        $response = $httpClient->request('GET', Endpoints::ENDPOINT_SPACE, [
+            RequestOptions::JSON => [
+                'accountId' => $spaceDefaultAccount->guid,
+                'dao' => $space->dao_address,
+            ]
+        ]);
+
+        if ($response->getStatusCode() == HttpStatus::OK) {
+            $body = json_decode($response->getBody()->getContents());
+            $space->updateAttributes(['coin_address' => $body->coin]);
+        } else {
+            throw new HttpException(
+                $response->getStatusCode(),
+                'Could not do get ethereum space details, will fix this ASAP !'
+            );
+        }
+    }
+
+    /**
+     * @param $event
+     * @throws GuzzleException
+     * @throws HttpException
+     */
     public static function addMember($event)
     {
         $space = $event->space;
