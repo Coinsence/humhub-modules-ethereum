@@ -74,43 +74,49 @@ class Space
         $space = $event->space;
         $member = $event->user;
 
-        if ($space instanceof BaseSpace && $member instanceof User) {
+        if (
+            !$space instanceof BaseSpace ||
+            !$member instanceof User ||
+            !$space->isModuleEnabled('xcoin') ||
+            $space->id == 1 // space with id = 1 is "Welcome Space" (this is the best way to check since it's the first space automatically created)
+        ) {
+            return;
+        }
 
-            $userDefaultAccount = Account::findOne([
-                'user_id' => $member->id,
-                'account_type' => Account::TYPE_DEFAULT,
-                'space_id' => null
-            ]);
+        $userDefaultAccount = Account::findOne([
+            'user_id' => $member->id,
+            'account_type' => Account::TYPE_DEFAULT,
+            'space_id' => null
+        ]);
 
-            if (!$userDefaultAccount) {
-                Utils::createDefaultAccount($member);
-            }
+        if (!$userDefaultAccount) {
+            Utils::createDefaultAccount($member);
+        }
 
-            $spaceDefaultAccount = Account::findOne([
-                'space_id' => $space->id,
-                'account_type' => Account::TYPE_DEFAULT
-            ]);
+        $spaceDefaultAccount = Account::findOne([
+            'space_id' => $space->id,
+            'account_type' => Account::TYPE_DEFAULT
+        ]);
 
-            if (!$spaceDefaultAccount) {
-                Utils::createDefaultAccount($space);
-            }
+        if (!$spaceDefaultAccount) {
+            Utils::createDefaultAccount($space);
+        }
 
-            $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
+        $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
 
-            $response = $httpClient->request('POST', Endpoints::ENDPOINT_SPACE_ADD_MEMBER, [
-                RequestOptions::JSON => [
-                    'accountId' => $spaceDefaultAccount->guid,
-                    'dao' => $space->dao_address,
-                    'members' => [$userDefaultAccount->ethereum_address]
-                ]
-            ]);
+        $response = $httpClient->request('POST', Endpoints::ENDPOINT_SPACE_ADD_MEMBER, [
+            RequestOptions::JSON => [
+                'accountId' => $spaceDefaultAccount->guid,
+                'dao' => $space->dao_address,
+                'members' => [$userDefaultAccount->ethereum_address]
+            ]
+        ]);
 
-            if ($response->getStatusCode() != HttpStatus::CREATED) {
-                throw new HttpException(
-                    $response->getStatusCode(),
-                    'Could not add member to this space, will fix this ASAP !'
-                );
-            }
+        if ($response->getStatusCode() != HttpStatus::CREATED) {
+            throw new HttpException(
+                $response->getStatusCode(),
+                'Could not add member to this space, will fix this ASAP !'
+            );
         }
     }
 
@@ -124,29 +130,35 @@ class Space
         $space = $event->space;
         $member = $event->user;
 
-        if ($space instanceof BaseSpace && $member instanceof User) {
+        if (
+            !$space instanceof BaseSpace ||
+            !$member instanceof User ||
+            !$space->isModuleEnabled('xcoin') ||
+            $space->id == 1 // space with id = 1 is "Welcome Space" (this is the best way to check since it's the first space automatically created)
+        ) {
+            return;
+        }
 
-            $userDefaultAccount = Account::findOne([
-                'user_id' => $member->id,
-                'account_type' => Account::TYPE_DEFAULT,
-                'space_id' => null
-            ]);
+        $userDefaultAccount = Account::findOne([
+            'user_id' => $member->id,
+            'account_type' => Account::TYPE_DEFAULT,
+            'space_id' => null
+        ]);
 
-            $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
+        $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
 
-            $response = $httpClient->request('POST', Endpoints::ENDPOINT_SPACE_LEAVE_SPACE, [
-                RequestOptions::JSON => [
-                    'accountId' => $userDefaultAccount->guid,
-                    'dao' => $space->dao_address,
-                ]
-            ]);
+        $response = $httpClient->request('POST', Endpoints::ENDPOINT_SPACE_LEAVE_SPACE, [
+            RequestOptions::JSON => [
+                'accountId' => $userDefaultAccount->guid,
+                'dao' => $space->dao_address,
+            ]
+        ]);
 
-            if ($response->getStatusCode() != HttpStatus::CREATED) {
-                throw new HttpException(
-                    $response->getStatusCode(),
-                    'Could not remove member from this space, will fix this ASAP !'
-                );
-            }
+        if ($response->getStatusCode() != HttpStatus::CREATED) {
+            throw new HttpException(
+                $response->getStatusCode(),
+                'Could not remove member from this space, will fix this ASAP !'
+            );
         }
     }
 }
