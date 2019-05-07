@@ -153,7 +153,10 @@ class Coin
                 ]
             ]);
 
-            if ($response->getStatusCode() != HttpStatus::CREATED) {
+            if ($response->getStatusCode() == HttpStatus::CREATED) {
+                $body = json_decode($response->getBody()->getContents());
+                $transaction->updateAttributes(['eth_hash' => $body->hash]);
+            } else {
                 throw new HttpException(
                     $response->getStatusCode(),
                     'Could not do transfer coins, will fix this ASAP !'
