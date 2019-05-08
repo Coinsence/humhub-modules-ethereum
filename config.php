@@ -8,6 +8,7 @@
  */
 
 use humhub\modules\space\models\Membership;
+use humhub\modules\xcoin\controllers\OverviewController;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\xcoin\models\Transaction;
 use yii\db\ActiveRecord;
@@ -51,6 +52,11 @@ return [
             'class' => Membership::class,
             'event' => 'memberRemoved',
             'callback' => ['humhub\modules\ethereum\calls\Space', 'leaveSpace']
+        ],
+        [
+            'class' => OverviewController::class,
+            'event' => 'spaceIndex',
+            'callback' => ['humhub\modules\ethereum\calls\Space', 'details']
         ],
     ],
 ];

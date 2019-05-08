@@ -35,29 +35,30 @@ class Dao
     {
         $space = $event->sender;
 
-        if ($space instanceof Space) {
+        if (!$space instanceof Space) {
+            return;
+        }
 
-            $defaultAccount = Account::findOne([
-                'space_id' => $space->id,
-                'account_type' => Account::TYPE_DEFAULT
-            ]);
+        $defaultAccount = Account::findOne([
+            'space_id' => $space->id,
+            'account_type' => Account::TYPE_DEFAULT
+        ]);
 
-            $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
+        $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
 
-            $response = $httpClient->request('POST', Endpoints::ENDPOINT_DAO, [
-                RequestOptions::JSON => [
-                    'accountId' => $defaultAccount->guid,
-                    'name' => $space->name,
-                    'descHash' => Utils::getDefaultDescHash()
-                ]
-            ]);
+        $response = $httpClient->request('POST', Endpoints::ENDPOINT_DAO, [
+            RequestOptions::JSON => [
+                'accountId' => $defaultAccount->guid,
+                'name' => $space->name,
+                'descHash' => Utils::getDefaultDescHash()
+            ]
+        ]);
 
-            if ($response->getStatusCode() == HttpStatus::CREATED) {
-                $body = json_decode($response->getBody()->getContents());
-                $space->updateAttributes(['dao_address' => $body->daoAddress]);
-            } else {
-                throw new HttpException($response->getStatusCode(),'Could not create DAO for this space, will fix this ASAP !');
-            }
+        if ($response->getStatusCode() == HttpStatus::CREATED) {
+            $body = json_decode($response->getBody()->getContents());
+            $space->updateAttributes(['dao_address' => $body->daoAddress]);
+        } else {
+            throw new HttpException($response->getStatusCode(), 'Could not create DAO for this space, will fix this ASAP !');
         }
     }
 }
