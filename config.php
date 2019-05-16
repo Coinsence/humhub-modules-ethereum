@@ -8,6 +8,7 @@
  */
 
 use humhub\modules\space\models\Membership;
+use humhub\modules\xcoin\controllers\EthereumController;
 use humhub\modules\xcoin\controllers\OverviewController;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\xcoin\models\Transaction;
@@ -57,6 +58,11 @@ return [
             'class' => OverviewController::class,
             'event' => 'spaceIndex',
             'callback' => ['humhub\modules\ethereum\calls\Space', 'details']
+        ],
+        [
+            'class' => EthereumController::class,
+            'event' => 'enableEthereum',
+            'callback' => ['humhub\modules\ethereum\calls\Space', 'enable']
         ],
     ],
 ];

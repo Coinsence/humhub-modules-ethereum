@@ -35,7 +35,7 @@ class Dao
     {
         $space = $event->sender;
 
-        if (!$space instanceof Space) {
+        if (!$space instanceof Space or $space->dao_address) {
             return;
         }
 

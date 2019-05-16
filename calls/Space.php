@@ -7,18 +7,21 @@
  * @author Daly Ghaith <daly.ghaith@gmail.com>
  */
 
-
 namespace humhub\modules\ethereum\calls;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
+use humhub\components\Event;
 use humhub\modules\ethereum\component\HttpStatus;
 use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
+use humhub\modules\space\MemberEvent;
 use humhub\modules\user\models\User;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\space\models\Space as BaseSpace;
+use humhub\modules\xcoin\models\Asset;
+use humhub\modules\xcoin\models\Transaction;
 use yii\web\HttpException;
 
 /**
@@ -160,5 +163,58 @@ class Space
                 'Could not remove member from this space, will fix this ASAP !'
             );
         }
+    }
+
+    /**
+     * Enable ethereum integration for already existing spaces
+     *
+     * @param $event
+     * @throws GuzzleException
+     * @throws HttpException
+     */
+    public function enable($event)
+    {
+        $space = $event->sender;
+
+        if (!$space instanceof BaseSpace) {
+            return;
+        }
+
+        $spaceDefaultAccount = Account::findOne([
+            'space_id' => $space->id,
+            'account_type' => Account::TYPE_DEFAULT
+        ]);
+
+        if (!$spaceDefaultAccount) {
+            Utils::createDefaultAccount($space);
+        } else {
+            Wallet::createWallet(new Event(['sender' => $spaceDefaultAccount]));
+            Dao::createDao($event);
+        }
+
+        $asset = Utils::issueSpaceAsset($space);
+
+        $transactions = Transaction::findAll([
+            'asset_id' => $asset->id,
+            'transaction_type' => Transaction::TRANSACTION_TYPE_ISSUE
+        ]);
+
+        // mint coins foreach issue transaction of the space
+        foreach ($transactions as $transaction) {
+            $mintEvent = new Event(['sender' => $transaction]);
+
+            Coin::mintCoin($mintEvent);
+        }
+
+        // add space members to created dao
+        foreach ($space->getMemberships()->all() as $member) {
+            $memberShipEvent = new MemberEvent([
+                'space' => $space, 'user' => $member
+            ]);
+
+            self::addMember($memberShipEvent);
+        }
+
+        self::details($event);
     }
 }

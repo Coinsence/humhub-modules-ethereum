@@ -33,6 +33,7 @@ class Wallet
         if (!$account instanceof Account) {
             return;
         }
+
         $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
 
         $response = $httpClient->request('POST', Endpoints::ENDPOINT_WALLET, [
