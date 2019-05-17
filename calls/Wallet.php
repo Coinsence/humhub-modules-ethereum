@@ -14,6 +14,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use humhub\modules\ethereum\component\HttpStatus;
+use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
 use humhub\modules\xcoin\models\Account;
 
@@ -25,6 +26,7 @@ class Wallet
     /**
      * @param $event
      * @throws GuzzleException
+     * @throws \yii\base\Exception
      */
     public static function createWallet($event)
     {
@@ -32,6 +34,10 @@ class Wallet
 
         if (!$account instanceof Account) {
             return;
+        }
+
+        if (!$account->guid) {
+            Utils::generateAccountGuid($account);
         }
 
         $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);

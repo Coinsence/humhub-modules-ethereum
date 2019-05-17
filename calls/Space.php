@@ -20,8 +20,8 @@ use humhub\modules\space\MemberEvent;
 use humhub\modules\user\models\User;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\space\models\Space as BaseSpace;
-use humhub\modules\xcoin\models\Asset;
 use humhub\modules\xcoin\models\Transaction;
+use yii\base\Exception;
 use yii\web\HttpException;
 
 /**
@@ -38,7 +38,7 @@ class Space
     {
         $space = $event->sender;
 
-        if (!$space->dao_address) {
+        if (!$space instanceof BaseSpace && !$space->dao_address) {
             return;
         }
 
@@ -71,6 +71,7 @@ class Space
      * @param $event
      * @throws GuzzleException
      * @throws HttpException
+     * @throws Exception
      */
     public static function addMember($event)
     {
@@ -94,6 +95,8 @@ class Space
 
         if (!$userDefaultAccount) {
             Utils::createDefaultAccount($member);
+        } elseif (!$userDefaultAccount->ethereum_address) {
+            Wallet::createWallet(new Event(['sender' => $userDefaultAccount]));
         }
 
         $spaceDefaultAccount = Account::findOne([
@@ -103,6 +106,8 @@ class Space
 
         if (!$spaceDefaultAccount) {
             Utils::createDefaultAccount($space);
+        } elseif (!$spaceDefaultAccount->ethereum_address) {
+            Wallet::createWallet(new Event(['sender' => $spaceDefaultAccount]));
         }
 
         $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
@@ -171,6 +176,7 @@ class Space
      * @param $event
      * @throws GuzzleException
      * @throws HttpException
+     * @throws Exception
      */
     public function enable($event)
     {
@@ -207,9 +213,10 @@ class Space
         }
 
         // add space members to created dao
-        foreach ($space->getMemberships()->all() as $member) {
+        foreach ($space->getMemberships()->all() as $memberShip) {
+
             $memberShipEvent = new MemberEvent([
-                'space' => $space, 'user' => $member
+                'space' => $space, 'user' => $memberShip->getUser()->one()
             ]);
 
             self::addMember($memberShipEvent);

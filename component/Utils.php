@@ -10,9 +10,11 @@
 namespace humhub\modules\ethereum\component;
 
 use humhub\components\Event;
+use humhub\libs\UUID;
 use humhub\modules\space\models\Space;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\xcoin\models\Asset;
+use yii\base\Exception;
 
 /**
  * Class Utils
@@ -74,5 +76,14 @@ class Utils
         }
 
         return $asset;
+    }
+
+    /**
+     * @param Account $account
+     * @throws Exception
+     */
+    public static function generateAccountGuid(Account $account)
+    {
+        $account->updateAttributes(['guid' => UUID::v4()]);
     }
 }
