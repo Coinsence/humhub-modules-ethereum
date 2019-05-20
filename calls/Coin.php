@@ -21,6 +21,7 @@ use humhub\modules\space\models\Space;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\xcoin\models\Asset;
 use humhub\modules\xcoin\models\Transaction;
+use Yii;
 use yii\base\Exception;
 use yii\web\HttpException;
 
@@ -50,7 +51,13 @@ class Coin
 
         $coinName = Utils::getCapitalizedSpaceName($space->name);
 
-        $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
+        $httpClient = new Client([
+            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
+            'http_errors' => false,
+            'headers' => [
+                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
+            ]
+        ]);
 
         $response = $httpClient->request('POST', Endpoints::ENDPOINT_COIN_ISSUE, [
             RequestOptions::JSON => [
@@ -91,7 +98,13 @@ class Coin
             'account_type' => Account::TYPE_DEFAULT
         ]);
 
-        $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
+        $httpClient = new Client([
+            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
+            'http_errors' => false,
+            'headers' => [
+                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
+            ]
+        ]);
 
         $response = $httpClient->request('POST', Endpoints::ENDPOINT_COIN_MINT, [
             RequestOptions::JSON => [
@@ -137,7 +150,13 @@ class Coin
             Wallet::createWallet(new Event(['sender' => $senderAccount]));
         }
 
-        $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
+        $httpClient = new Client([
+            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
+            'http_errors' => false,
+            'headers' => [
+                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
+            ]
+        ]);
 
         $response = $httpClient->request('POST', Endpoints::ENDPOINT_COIN_TRANSFER, [
             RequestOptions::JSON => [

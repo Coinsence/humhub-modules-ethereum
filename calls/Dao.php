@@ -18,6 +18,7 @@ use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
 use humhub\modules\space\models\Space;
 use humhub\modules\xcoin\models\Account;
+use Yii;
 use yii\web\HttpException;
 
 
@@ -44,7 +45,13 @@ class Dao
             'account_type' => Account::TYPE_DEFAULT
         ]);
 
-        $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
+        $httpClient = new Client([
+            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
+            'http_errors' => false,
+            'headers' => [
+                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
+            ]
+        ]);
 
         $response = $httpClient->request('POST', Endpoints::ENDPOINT_DAO, [
             RequestOptions::JSON => [

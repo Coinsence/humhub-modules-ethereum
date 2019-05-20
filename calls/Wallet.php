@@ -17,6 +17,7 @@ use humhub\modules\ethereum\component\HttpStatus;
 use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
 use humhub\modules\xcoin\models\Account;
+use Yii;
 
 /**
  * Class Wallet
@@ -40,7 +41,13 @@ class Wallet
             Utils::generateAccountGuid($account);
         }
 
-        $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
+        $httpClient = new Client([
+            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
+            'http_errors' => false,
+            'headers' => [
+                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
+            ]
+        ]);
 
         $response = $httpClient->request('POST', Endpoints::ENDPOINT_WALLET, [
             RequestOptions::JSON => ['accountId' => $account->guid]
