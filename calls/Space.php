@@ -198,20 +198,6 @@ class Space
             Dao::createDao($event);
         }
 
-        $asset = Utils::issueSpaceAsset($space);
-
-        $transactions = Transaction::findAll([
-            'asset_id' => $asset->id,
-            'transaction_type' => Transaction::TRANSACTION_TYPE_ISSUE
-        ]);
-
-        // mint coins foreach issue transaction of the space
-        foreach ($transactions as $transaction) {
-            $mintEvent = new Event(['sender' => $transaction]);
-
-            Coin::mintCoin($mintEvent);
-        }
-
         // add space members to created dao
         foreach ($space->getMemberships()->all() as $memberShip) {
 
@@ -220,6 +206,23 @@ class Space
             ]);
 
             self::addMember($memberShipEvent);
+        }
+
+        $asset = Utils::issueSpaceAsset($space);
+
+        $transactions = Transaction::findAll([
+            'asset_id' => $asset->id,
+        ]);
+
+        foreach ($transactions as $transaction) {
+            $transactionEvent = new Event(['sender' => $transaction]);
+            if ($transaction->transaction_type == Transaction::TRANSACTION_TYPE_ISSUE) {
+                // mint coins for each issue transaction of the space
+                Coin::mintCoin($transactionEvent);
+            } else {
+                //transfer coins for each coin holder
+                Coin::transferCoin($transactionEvent);
+            }
         }
 
         self::details($event);
