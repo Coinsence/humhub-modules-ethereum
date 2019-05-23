@@ -40,6 +40,8 @@ class Dao
             return;
         }
 
+        $coinName = Utils::getCapitalizedSpaceName($space->name);
+
         $defaultAccount = Account::findOne([
             'space_id' => $space->id,
             'account_type' => Account::TYPE_DEFAULT
@@ -56,14 +58,18 @@ class Dao
         $response = $httpClient->request('POST', Endpoints::ENDPOINT_DAO, [
             RequestOptions::JSON => [
                 'accountId' => $defaultAccount->guid,
-                'name' => $space->name,
-                'descHash' => Utils::getDefaultDescHash()
+                'spaceName' => $space->name,
+                'descHash' => Utils::getDefaultDescHash(),
+                'coinName' => $coinName,
+                'coinSymbol' => Utils::getCoinSymbol($coinName),
+                'coinDecimals' => Utils::COIN_DECIMALS
             ]
         ]);
 
         if ($response->getStatusCode() == HttpStatus::CREATED) {
             $body = json_decode($response->getBody()->getContents());
             $space->updateAttributes(['dao_address' => $body->daoAddress]);
+            $space->updateAttributes(['coin_address' => $body->apps[1]->proxy]);
         } else {
             throw new HttpException($response->getStatusCode(), 'Could not create DAO for this space, will fix this ASAP !');
         }

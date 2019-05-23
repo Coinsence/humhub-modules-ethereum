@@ -30,11 +30,6 @@ return [
             'callback' => ['humhub\modules\ethereum\calls\Dao', 'createDao']
         ],
         [
-            'class' => Account::class,
-            'event' => 'defaultSpaceAccountCreated',
-            'callback' => ['humhub\modules\ethereum\calls\Coin', 'issueCoin']
-        ],
-        [
             'class' => Transaction::class,
             'event' => 'transactionTypeIssue',
             'callback' => ['humhub\modules\ethereum\calls\Coin', 'mintCoin']
@@ -53,11 +48,6 @@ return [
             'class' => Membership::class,
             'event' => 'memberRemoved',
             'callback' => ['humhub\modules\ethereum\calls\Space', 'leaveSpace']
-        ],
-        [
-            'class' => OverviewController::class,
-            'event' => 'spaceIndex',
-            'callback' => ['humhub\modules\ethereum\calls\Space', 'details']
         ],
         [
             'class' => EthereumController::class,

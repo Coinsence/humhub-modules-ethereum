@@ -18,6 +18,7 @@ use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
 use humhub\modules\xcoin\models\Account;
 use Yii;
+use yii\base\Exception;
 
 /**
  * Class Wallet
@@ -27,13 +28,13 @@ class Wallet
     /**
      * @param $event
      * @throws GuzzleException
-     * @throws \yii\base\Exception
+     * @throws Exception
      */
     public static function createWallet($event)
     {
         $account = $event->sender;
 
-        if (!$account instanceof Account) {
+        if (!$account instanceof Account or $account->account_type == Account::TYPE_ISSUE) {
             return;
         }
 

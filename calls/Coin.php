@@ -36,52 +36,6 @@ class Coin
      * @throws GuzzleException
      * @throws HttpException
      */
-    public static function issueCoin($event)
-    {
-        $space = $event->sender;
-
-        if (!$space instanceof Space) {
-            return;
-        }
-
-        $defaultAccount = Account::findOne([
-            'space_id' => $space->id,
-            'account_type' => Account::TYPE_DEFAULT
-        ]);
-
-        $coinName = Utils::getCapitalizedSpaceName($space->name);
-
-        $httpClient = new Client([
-            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
-            'http_errors' => false,
-            'headers' => [
-                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
-            ]
-        ]);
-
-        $response = $httpClient->request('POST', Endpoints::ENDPOINT_COIN_ISSUE, [
-            RequestOptions::JSON => [
-                'accountId' => $defaultAccount->guid,
-                'dao' => $space->dao_address,
-                'name' => $coinName,
-                'symbol' => Utils::getCoinSymbol($coinName),
-                'decimals' => Utils::COIN_DECIMALS
-            ]
-        ]);
-
-        if ($response->getStatusCode() != HttpStatus::CREATED) {
-            throw new HttpException(
-                $response->getStatusCode(),
-                'Could not create ethereum coin for this space, will fix this ASAP !'
-            );
-        }
-    }
-
-    /**
-     * @param $event
-     * @throws GuzzleException
-     * @throws HttpException
-     */
     public static function mintCoin($event)
     {
         $transaction = $event->sender;
