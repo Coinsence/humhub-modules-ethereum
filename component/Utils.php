@@ -35,7 +35,9 @@ class Utils
     {
         $symbol = '';
         foreach (explode(' ', $coinName) as $word) {
-            $symbol .= strtoupper($word[0]);
+            if (!empty($word)) {
+                $symbol .= strtoupper($word[0]);
+            }
         }
 
         return $symbol;
