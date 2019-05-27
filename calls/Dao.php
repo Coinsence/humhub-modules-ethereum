@@ -18,6 +18,7 @@ use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
 use humhub\modules\space\models\Space;
 use humhub\modules\xcoin\models\Account;
+use Yii;
 use yii\web\HttpException;
 
 
@@ -35,28 +36,40 @@ class Dao
     {
         $space = $event->sender;
 
-        if (!$space instanceof Space) {
+        if (!$space instanceof Space or $space->dao_address) {
             return;
         }
+
+        $coinName = Utils::getCapitalizedSpaceName($space->name);
 
         $defaultAccount = Account::findOne([
             'space_id' => $space->id,
             'account_type' => Account::TYPE_DEFAULT
         ]);
 
-        $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
+        $httpClient = new Client([
+            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
+            'http_errors' => false,
+            'headers' => [
+                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
+            ]
+        ]);
 
         $response = $httpClient->request('POST', Endpoints::ENDPOINT_DAO, [
             RequestOptions::JSON => [
                 'accountId' => $defaultAccount->guid,
-                'name' => $space->name,
-                'descHash' => Utils::getDefaultDescHash()
+                'spaceName' => $space->name,
+                'descHash' => Utils::getDefaultDescHash(),
+                'coinName' => $coinName,
+                'coinSymbol' => Utils::getCoinSymbol($coinName),
+                'coinDecimals' => Utils::COIN_DECIMALS
             ]
         ]);
 
         if ($response->getStatusCode() == HttpStatus::CREATED) {
             $body = json_decode($response->getBody()->getContents());
             $space->updateAttributes(['dao_address' => $body->daoAddress]);
+            $space->updateAttributes(['coin_address' => $body->apps[1]->proxy]);
         } else {
             throw new HttpException($response->getStatusCode(), 'Could not create DAO for this space, will fix this ASAP !');
         }

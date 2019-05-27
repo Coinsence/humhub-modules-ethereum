@@ -10,8 +10,11 @@
 namespace humhub\modules\ethereum\component;
 
 use humhub\components\Event;
+use humhub\libs\UUID;
 use humhub\modules\space\models\Space;
 use humhub\modules\xcoin\models\Account;
+use humhub\modules\xcoin\models\Asset;
+use yii\base\Exception;
 
 /**
  * Class Utils
@@ -32,7 +35,9 @@ class Utils
     {
         $symbol = '';
         foreach (explode(' ', $coinName) as $word) {
-            $symbol .= strtoupper($word[0]);
+            if (!empty($word)) {
+                $symbol .= strtoupper($word[0]);
+            }
         }
 
         return $symbol;
@@ -47,19 +52,40 @@ class Utils
     {
         if ($entity instanceof Space) {
 
-                $account = new Account();
-                $account->title = 'Default';
-                $account->space_id = $entity->id;
-                $account->account_type = Account::TYPE_DEFAULT;
-                $account->save();
+            $account = new Account();
+            $account->title = 'Default';
+            $account->space_id = $entity->id;
+            $account->account_type = Account::TYPE_DEFAULT;
+            $account->save();
 
-                Event::trigger(Account::class, Account::EVENT_DEFAULT_SPACE_ACCOUNT_CREATED, new Event(['sender' => $entity]));
+            Event::trigger(Account::class, Account::EVENT_DEFAULT_SPACE_ACCOUNT_CREATED, new Event(['sender' => $entity]));
         } else {
-                $account = new Account();
-                $account->title = 'Default';
-                $account->user_id = $entity->id;
-                $account->account_type = Account::TYPE_DEFAULT;
-                $account->save();
+            $account = new Account();
+            $account->title = 'Default';
+            $account->user_id = $entity->id;
+            $account->account_type = Account::TYPE_DEFAULT;
+            $account->save();
         }
+    }
+
+    public static function issueSpaceAsset(Space $space)
+    {
+        if (!$asset = Asset::findOne(['space_id' => $space->id])) {
+            $asset = new Asset();
+            $asset->title = 'DEFAULT';
+            $asset->space_id = $space->id;
+            $asset->save();
+        }
+
+        return $asset;
+    }
+
+    /**
+     * @param Account $account
+     * @throws Exception
+     */
+    public static function generateAccountGuid(Account $account)
+    {
+        $account->updateAttributes(['guid' => UUID::v4()]);
     }
 }

@@ -14,8 +14,11 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use humhub\modules\ethereum\component\HttpStatus;
+use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
 use humhub\modules\xcoin\models\Account;
+use Yii;
+use yii\base\Exception;
 
 /**
  * Class Wallet
@@ -25,15 +28,27 @@ class Wallet
     /**
      * @param $event
      * @throws GuzzleException
+     * @throws Exception
      */
     public static function createWallet($event)
     {
         $account = $event->sender;
 
-        if (!$account instanceof Account) {
+        if (!$account instanceof Account or $account->account_type == Account::TYPE_ISSUE) {
             return;
         }
-        $httpClient = new Client(['base_uri' => Endpoints::ENDPOINT_BASE_URI, 'http_errors' => false]);
+
+        if (!$account->guid) {
+            Utils::generateAccountGuid($account);
+        }
+
+        $httpClient = new Client([
+            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
+            'http_errors' => false,
+            'headers' => [
+                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
+            ]
+        ]);
 
         $response = $httpClient->request('POST', Endpoints::ENDPOINT_WALLET, [
             RequestOptions::JSON => ['accountId' => $account->guid]

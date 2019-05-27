@@ -22,10 +22,8 @@ class Endpoints
     // rest api endpoints list
     const ENDPOINT_WALLET = '/wallet';
     const ENDPOINT_DAO = '/dao';
-    const ENDPOINT_COIN_ISSUE = '/coin/issue';
     const ENDPOINT_COIN_MINT = '/coin/mint';
     const ENDPOINT_COIN_TRANSFER = '/coin/transfer';
-    const ENDPOINT_SPACE = '/space';
     const ENDPOINT_SPACE_ADD_MEMBER = '/space/addMembers';
     const ENDPOINT_SPACE_LEAVE_SPACE = '/space/leave';
 }
