@@ -28,7 +28,7 @@ class Utils
 
     public static function getCapitalizedSpaceName($spaceName)
     {
-        if (preg_match('/Coin$/', $spaceName)) {
+        if (preg_match('/coin$/', strtolower($spaceName))) {
             return ucwords($spaceName);
         }
 
