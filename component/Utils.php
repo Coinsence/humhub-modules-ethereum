@@ -28,6 +28,10 @@ class Utils
 
     public static function getCapitalizedSpaceName($spaceName)
     {
+        if (preg_match('/Coin$/', $spaceName)) {
+            return ucwords($spaceName);
+        }
+
         return ucwords($spaceName) . ' ' . self::COIN_SUFFIX;
     }
 

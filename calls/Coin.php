@@ -10,18 +10,15 @@
 
 namespace humhub\modules\ethereum\calls;
 
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use humhub\components\Event;
 use humhub\modules\ethereum\component\HttpStatus;
-use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
 use humhub\modules\space\models\Space;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\xcoin\models\Asset;
 use humhub\modules\xcoin\models\Transaction;
-use Yii;
 use yii\base\Exception;
 use yii\web\HttpException;
 
@@ -52,15 +49,9 @@ class Coin
             'account_type' => Account::TYPE_DEFAULT
         ]);
 
-        $httpClient = new Client([
-            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
-            'http_errors' => false,
-            'headers' => [
-                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
-            ]
-        ]);
+        BaseCall::__init();
 
-        $response = $httpClient->request('POST', Endpoints::ENDPOINT_COIN_MINT, [
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_COIN_MINT, [
             RequestOptions::JSON => [
                 'accountId' => $defaultAccount->guid,
                 'dao' => $space->dao_address,
@@ -104,15 +95,9 @@ class Coin
             Wallet::createWallet(new Event(['sender' => $senderAccount]));
         }
 
-        $httpClient = new Client([
-            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
-            'http_errors' => false,
-            'headers' => [
-                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
-            ]
-        ]);
+        BaseCall::__init();
 
-        $response = $httpClient->request('POST', Endpoints::ENDPOINT_COIN_TRANSFER, [
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_COIN_TRANSFER, [
             RequestOptions::JSON => [
                 'accountId' => $senderAccount->guid,
                 'dao' => $space->dao_address,

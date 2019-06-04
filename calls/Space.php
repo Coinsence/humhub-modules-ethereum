@@ -9,7 +9,6 @@
 
 namespace humhub\modules\ethereum\calls;
 
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use humhub\components\Event;
@@ -21,7 +20,6 @@ use humhub\modules\user\models\User;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\space\models\Space as BaseSpace;
 use humhub\modules\xcoin\models\Transaction;
-use Yii;
 use yii\base\Exception;
 use yii\web\HttpException;
 
@@ -73,15 +71,9 @@ class Space
             Wallet::createWallet(new Event(['sender' => $spaceDefaultAccount]));
         }
 
-        $httpClient = new Client([
-            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
-            'http_errors' => false,
-            'headers' => [
-                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
-            ]
-        ]);
+        BaseCall::__init();
 
-        $response = $httpClient->request('POST', Endpoints::ENDPOINT_SPACE_ADD_MEMBER, [
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_SPACE_ADD_MEMBER, [
             RequestOptions::JSON => [
                 'accountId' => $spaceDefaultAccount->guid,
                 'dao' => $space->dao_address,
@@ -122,15 +114,9 @@ class Space
             'space_id' => null
         ]);
 
-        $httpClient = new Client([
-            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
-            'http_errors' => false,
-            'headers' => [
-                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
-            ]
-        ]);
+        BaseCall::__init();
 
-        $response = $httpClient->request('POST', Endpoints::ENDPOINT_SPACE_LEAVE_SPACE, [
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_SPACE_LEAVE_SPACE, [
             RequestOptions::JSON => [
                 'accountId' => $userDefaultAccount->guid,
                 'dao' => $space->dao_address,
