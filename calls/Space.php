@@ -15,11 +15,11 @@ use humhub\components\Event;
 use humhub\modules\ethereum\component\HttpStatus;
 use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
-use humhub\modules\space\MemberEvent;
+use humhub\modules\ethereum\jobs\MigrateSpace;
 use humhub\modules\user\models\User;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\space\models\Space as BaseSpace;
-use humhub\modules\xcoin\models\Transaction;
+use Yii;
 use yii\base\Exception;
 use yii\web\HttpException;
 
@@ -159,31 +159,6 @@ class Space
             Dao::createDao($event);
         }
 
-        // add space members to created dao
-        foreach ($space->getMemberships()->all() as $memberShip) {
-
-            $memberShipEvent = new MemberEvent([
-                'space' => $space, 'user' => $memberShip->getUser()->one()
-            ]);
-
-            self::addMember($memberShipEvent);
-        }
-
-        $asset = Utils::issueSpaceAsset($space);
-
-        $transactions = Transaction::findAll([
-            'asset_id' => $asset->id,
-        ]);
-
-        foreach ($transactions as $transaction) {
-            $transactionEvent = new Event(['sender' => $transaction]);
-            if ($transaction->transaction_type == Transaction::TRANSACTION_TYPE_ISSUE) {
-                // mint coins for each issue transaction of the space
-                Coin::mintCoin($transactionEvent);
-            } else {
-                //transfer coins for each coin holder
-                Coin::transferCoin($transactionEvent);
-            }
-        }
+        Yii::$app->queue->push(new MigrateSpace(['spaceId' => $space->id]));
     }
 }
