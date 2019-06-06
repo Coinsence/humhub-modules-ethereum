@@ -71,6 +71,6 @@ class MigrateSpace extends ActiveJob
             }
         }
 
-        $space->updateAttributes(['eth_status' => 2]);
+        $space->updateAttributes(['eth_status' => BaseSpace::ETHEREUM_STATUS_ENABLED]);
     }
 }
