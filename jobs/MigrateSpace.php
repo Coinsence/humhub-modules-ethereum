@@ -63,9 +63,9 @@ class MigrateSpace extends ActiveJob
 
             $accounts [] = [
                 'address' => $defaultAccount->ethereum_address,
-                'account_id' => $defaultAccount->guid,
+                'accountId' => $defaultAccount->guid,
                 'balance' => (int)$defaultAccount->getAssetBalance($asset),
-                'is_member' => true
+                'isMember' => true
             ];
         }
 
@@ -77,9 +77,9 @@ class MigrateSpace extends ActiveJob
 
                 $accounts [] = [
                     'address' => $account->ethereum_address,
-                    'account_id' => $account->guid,
+                    'accountId' => $account->guid,
                     'balance' => (int)$account->getAssetBalance($asset),
-                    'is_member' => false
+                    'isMember' => false
                 ];
             }
         }
@@ -87,12 +87,12 @@ class MigrateSpace extends ActiveJob
         // create wallet only for accounts without eth_address
         Wallet::createWallets(array_column(array_filter($accounts, function ($account) {
             return !isset($account['address']);
-        }), 'account_id'));
+        }), 'accountId'));
 
         // update eth_address for accounts without eth_address
         $accounts = array_map(function (&$element) {
             if (!isset($element['address'])) {
-                $account = Account::findOne(['guid' => $element['account_id']]);
+                $account = Account::findOne(['guid' => $element['accountId']]);
                 $element['address'] = $account->ethereum_address;
             }
         }, $accounts);
