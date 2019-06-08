@@ -75,7 +75,7 @@ class MigrateSpace extends ActiveJob
 
             $account = Account::findOne(['id' => $transaction->to_account_id]);
 
-            if ($account && $account->account_type != Account::TYPE_ISSUE) {
+            if ($account && $account->account_type != Account::TYPE_ISSUE && !Utils::in_array_r($account->guid, $accounts)) {
                 if (!$account->guid) {
                     Utils::generateAccountGuid($account);
                 }
