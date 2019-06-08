@@ -71,11 +71,18 @@ class MigrateSpace extends ActiveJob
             ];
         }
 
+        Yii::warning($accounts, 'cron');
+
         foreach (Transaction::find()->where(['asset_id' => $asset->id])->distinct('to_account_id')->all() as $transaction) {
 
             $account = Account::findOne(['id' => $transaction->to_account_id]);
 
-            if ($account && $account->account_type != Account::TYPE_ISSUE && !Utils::in_array_r($account->guid, $accounts)) {
+            if (
+                $account &&
+                $account->account_type != Account::TYPE_ISSUE &&
+                !in_array($account->guid, array_column($accounts, 'accountId'))
+            ) {
+                Yii::warning("account guid : $account->guid", 'cron');
                 if (!$account->guid) {
                     Utils::generateAccountGuid($account);
                 }
@@ -88,6 +95,8 @@ class MigrateSpace extends ActiveJob
                 ];
             }
         }
+
+        Yii::warning($accounts, 'cron');
 
         try {
             // create wallet only for accounts without eth_address
@@ -107,6 +116,8 @@ class MigrateSpace extends ActiveJob
 
             return $element;
         }, $accounts);
+
+        Yii::warning($accounts, 'cron');
 
         try {
             Space::migrate([
