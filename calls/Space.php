@@ -174,8 +174,12 @@ class Space
 
         BaseCall::__init();
 
-        BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_SPACE_MIGRATE, [
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_SPACE_MIGRATE, [
             RequestOptions::JSON => $space
         ]);
+
+        if ($response->getStatusCode() != HttpStatus::CREATED) {
+           Yii::error("error migrating when migrating space : {$response->getBody()}", 'cron');
+        }
     }
 }
