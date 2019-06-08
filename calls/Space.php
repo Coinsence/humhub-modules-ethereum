@@ -161,4 +161,21 @@ class Space
 
         Yii::$app->queue->push(new MigrateSpace(['spaceId' => $space->id]));
     }
+
+    /**
+     * @param $space
+     * @throws GuzzleException
+     */
+    public static function migrate($space)
+    {
+        if (!is_array($space)) {
+            return;
+        }
+
+        BaseCall::__init();
+
+        BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_SPACE_MIGRATE, [
+            RequestOptions::JSON => $space
+        ]);
+    }
 }

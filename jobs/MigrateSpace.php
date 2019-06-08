@@ -10,16 +10,13 @@
 namespace humhub\modules\ethereum\jobs;
 
 use GuzzleHttp\Exception\GuzzleException;
-use humhub\modules\ethereum\calls\Coin;
 use humhub\modules\ethereum\calls\Space;
+use humhub\modules\ethereum\calls\Wallet;
 use humhub\modules\ethereum\component\Utils;
-use humhub\modules\space\MemberEvent;
 use humhub\modules\space\models\Space as BaseSpace;
 use humhub\modules\queue\ActiveJob;
-use humhub\modules\xcoin\models\Transaction;
-use yii\base\Event;
+use humhub\modules\xcoin\models\Account;
 use yii\base\Exception;
-use yii\web\HttpException;
 
 class MigrateSpace extends ActiveJob
 {
@@ -34,7 +31,6 @@ class MigrateSpace extends ActiveJob
      *
      * @throws GuzzleException
      * @throws Exception
-     * @throws HttpException
      */
     public function run()
     {
@@ -44,32 +40,70 @@ class MigrateSpace extends ActiveJob
             return;
         }
 
-        // add space members to space dao
-        foreach ($space->getMemberships()->all() as $memberShip) {
-
-            $memberShipEvent = new MemberEvent([
-                'space' => $space, 'user' => $memberShip->getUser()->one()
-            ]);
-
-            Space::addMember($memberShipEvent);
-        }
+        $spaceDefaultAccount = Account::findOne([
+            'space_id' => $space->id,
+            'account_type' => Account::TYPE_DEFAULT
+        ]);
 
         $asset = Utils::issueSpaceAsset($space);
 
-        $transactions = Transaction::findAll([
-            'asset_id' => $asset->id,
-        ]);
+        $accounts = array();
 
-        foreach ($transactions as $transaction) {
-            $transactionEvent = new Event(['sender' => $transaction]);
-            if ($transaction->transaction_type == Transaction::TRANSACTION_TYPE_ISSUE) {
-                // mint coins for each issue transaction of the space
-                Coin::mintCoin($transactionEvent);
-            } else {
-                //transfer coins for each coin holder
-                Coin::transferCoin($transactionEvent);
+        foreach ($space->getMemberships()->all() as $memberShip) {
+
+            $defaultAccount = Account::findOne([
+                'user_id' => $memberShip->getUser()->one()->id,
+                'account_type' => Account::TYPE_DEFAULT,
+                'space_id' => null
+            ]);
+
+            if (!$defaultAccount->guid) {
+                Utils::generateAccountGuid($defaultAccount);
+            }
+
+            $accounts [] = [
+                'address' => $defaultAccount->ethereum_address,
+                'account_id' => $defaultAccount->guid,
+                'balance' => (int)$defaultAccount->getAssetBalance($asset),
+                'is_member' => true
+            ];
+        }
+
+        foreach (Account::findAll(['space_id' => $space->id]) as $account) {
+            if (!in_array($account->account_type, [Account::TYPE_ISSUE, Account::TYPE_DEFAULT])) {
+                if (!$account->guid) {
+                    Utils::generateAccountGuid($account);
+                }
+
+                $accounts [] = [
+                    'address' => $account->ethereum_address,
+                    'account_id' => $account->guid,
+                    'balance' => (int)$account->getAssetBalance($asset),
+                    'is_member' => false
+                ];
             }
         }
+
+        // create wallet only for accounts without eth_address
+        Wallet::createWallets(array_column(array_filter($accounts, function ($account) {
+            return !isset($account['address']);
+        }), 'account_id'));
+
+        // update eth_address for accounts without eth_address
+        $accounts = array_map(function (&$element) {
+            if (!isset($element['address'])) {
+                $account = Account::findOne(['guid' => $element['account_id']]);
+                $element['address'] = $account->ethereum_address;
+            }
+        }, $accounts);
+
+        Space::migrate([
+            'dao' => $space->dao_address,
+            'accountId' => $spaceDefaultAccount->guid,
+            'accounts' => array_filter($accounts, function ($account) {
+                return $account['balance'] > 0;
+            })
+        ]);
 
         $space->updateAttributes(['eth_status' => BaseSpace::ETHEREUM_STATUS_ENABLED]);
     }

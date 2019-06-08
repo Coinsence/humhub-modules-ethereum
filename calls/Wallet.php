@@ -56,4 +56,31 @@ class Wallet
             );
         }
     }
+
+    /**
+     * @param array $accountsGuids
+     * @throws GuzzleException
+     */
+    public static function createWallets(array $accountsGuids)
+    {
+        if (!is_array($accountsGuids)) {
+            return;
+        }
+
+        BaseCall::__init();
+
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_WALLET, [
+            RequestOptions::JSON => ['accountsIds' => $accountsGuids]
+        ]);
+
+        if ($response->getStatusCode() == HttpStatus::CREATED) {
+            $wallets = json_decode($response->getBody()->getContents());
+            foreach ($wallets as $wallet) {
+                $account = Account::findOne(['guid' => $wallet->accountId]);
+                if ($account) {
+                    $account->updateAttributes(['ethereum_address' => $wallet->address]);
+                }
+            }
+        }
+    }
 }

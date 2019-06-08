@@ -26,4 +26,5 @@ class Endpoints
     const ENDPOINT_COIN_TRANSFER = '/coin/transfer';
     const ENDPOINT_SPACE_ADD_MEMBER = '/space/addMembers';
     const ENDPOINT_SPACE_LEAVE_SPACE = '/space/leave';
+    const ENDPOINT_SPACE_MIGRATE = '/migrate/space';
 }
