@@ -71,8 +71,6 @@ class MigrateSpace extends ActiveJob
             ];
         }
 
-        Yii::warning($accounts, 'cron');
-
         foreach (Transaction::find()->where(['asset_id' => $asset->id])->distinct('to_account_id')->all() as $transaction) {
 
             $account = Account::findOne(['id' => $transaction->to_account_id]);
@@ -96,8 +94,6 @@ class MigrateSpace extends ActiveJob
             }
         }
 
-        Yii::warning($accounts, 'cron');
-
         try {
             // create wallet only for accounts without eth_address
             Wallet::createWallets(array_column(array_filter($accounts, function ($account) {
@@ -116,8 +112,6 @@ class MigrateSpace extends ActiveJob
 
             return $element;
         }, $accounts);
-
-        Yii::warning($accounts, 'cron');
 
         try {
             Space::migrate([
