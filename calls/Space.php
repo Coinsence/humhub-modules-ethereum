@@ -15,7 +15,7 @@ use humhub\components\Event;
 use humhub\modules\ethereum\component\HttpStatus;
 use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
-use humhub\modules\ethereum\jobs\MigrateSpace;
+use humhub\modules\ethereum\jobs\CreateWallets;
 use humhub\modules\user\models\User;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\space\models\Space as BaseSpace;
@@ -159,7 +159,7 @@ class Space
             Dao::createDao($event);
         }
 
-        Yii::$app->queue->push(new MigrateSpace(['spaceId' => $space->id]));
+        Yii::$app->queue->push(new CreateWallets(['spaceId' => $space->id]));
     }
 
     /**
