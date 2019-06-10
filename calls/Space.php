@@ -159,7 +159,7 @@ class Space
             Dao::createDao($event);
         }
 
-        Yii::$app->queue->delay(Utils::DELAY_5_MINUTES)->push(new CreateWallets(['spaceId' => $space->id]));
+        Yii::$app->queue->delay(Utils::DELAY_1_MINUTE)->push(new CreateWallets(['spaceId' => $space->id]));
     }
 
     /**
