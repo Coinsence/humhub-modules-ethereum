@@ -17,8 +17,6 @@ namespace humhub\modules\ethereum;
  */
 class Endpoints
 {
-    const ENDPOINT_BASE_URI = 'http://localhost:3000';
-
     // rest api endpoints list
     const ENDPOINT_WALLET = '/wallet';
     const ENDPOINT_DAO = '/dao';

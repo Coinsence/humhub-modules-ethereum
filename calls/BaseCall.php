@@ -21,7 +21,7 @@ class BaseCall
     public static function __init()
     {
         return self::$httpClient = new Client([
-            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
+            'base_uri' => Yii::$app->params['ethereum_api_base_uri'],
             'http_errors' => false,
             'headers' => [
                 'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
