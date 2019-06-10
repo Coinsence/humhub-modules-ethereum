@@ -111,7 +111,7 @@ class CreateWallets extends ActiveJob
         }, $accounts);
 
         // push new entry in queue for migrating space (add members & minting coins)
-        Yii::$app->queue->push(new MigrateSpace([
+        Yii::$app->queue->delay(Utils::DELAY_5_MINUTES)->push(new MigrateSpace([
             'spaceId' => $space->id,
             'data' => [
                 'dao' => $space->dao_address,

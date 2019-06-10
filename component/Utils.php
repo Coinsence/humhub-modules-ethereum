@@ -26,6 +26,8 @@ class Utils
     const COIN_SUFFIX = 'Coin';
     const COIN_DECIMALS = 18;
 
+    const DELAY_5_MINUTES = 5 * 60;
+
     public static function getCapitalizedSpaceName($spaceName)
     {
         if (preg_match('/coin$/', strtolower($spaceName))) {
