@@ -49,7 +49,7 @@ class MigrateSpace extends ActiveJob
 
         $asset = Utils::issueSpaceAsset($space);
 
-        $accounts = array();
+        $accounts = [];
 
         foreach ($space->getMemberships()->all() as $memberShip) {
 
@@ -63,7 +63,7 @@ class MigrateSpace extends ActiveJob
                 Utils::generateAccountGuid($defaultAccount);
             }
 
-            $accounts [] = [
+            $accounts[] = [
                 'address' => $defaultAccount->ethereum_address,
                 'accountId' => $defaultAccount->guid,
                 'balance' => (int)$defaultAccount->getAssetBalance($asset),
@@ -80,12 +80,11 @@ class MigrateSpace extends ActiveJob
                 $account->account_type != Account::TYPE_ISSUE &&
                 !in_array($account->guid, array_column($accounts, 'accountId'))
             ) {
-                Yii::warning("account guid : $account->guid", 'cron');
                 if (!$account->guid) {
                     Utils::generateAccountGuid($account);
                 }
 
-                $accounts [] = [
+                $accounts[] = [
                     'address' => $account->ethereum_address,
                     'accountId' => $account->guid,
                     'balance' => (int)$account->getAssetBalance($asset),
