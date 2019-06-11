@@ -94,7 +94,7 @@ class CreateWallets extends ActiveJob
         try {
             // create wallet only for accounts without eth_address
             Wallet::createWallets(array_column(array_filter($accounts, function ($account) {
-                return !isset($account['address']);
+                return empty($account['address']);
             }), 'accountId'));
         } catch (\Exception $exception) {
             Yii::warning("Exception when creating wallets for space {$space} : {$exception->getMessage()}", 'cron');
