@@ -97,12 +97,12 @@ class CreateWallets extends ActiveJob
                 return empty($account['address']);
             }), 'accountId'));
         } catch (\Exception $exception) {
-            Yii::warning("Exception when creating wallets for space {$space} : {$exception->getMessage()}", 'cron');
+            Yii::warning("Exception when creating wallets for space {$space->name} : {$exception->getMessage()}", 'cron');
         }
 
         // update eth_address for accounts without eth_address
         $accounts = array_map(function (&$element) {
-            if (!isset($element['address'])) {
+            if (empty($element['address'])) {
                 $account = Account::findOne(['guid' => $element['accountId']]);
                 $element['address'] = $account->ethereum_address;
             }
