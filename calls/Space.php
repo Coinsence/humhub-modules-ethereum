@@ -9,18 +9,16 @@
 
 namespace humhub\modules\ethereum\calls;
 
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use humhub\components\Event;
 use humhub\modules\ethereum\component\HttpStatus;
 use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
-use humhub\modules\space\MemberEvent;
+use humhub\modules\ethereum\jobs\CreateWallets;
 use humhub\modules\user\models\User;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\space\models\Space as BaseSpace;
-use humhub\modules\xcoin\models\Transaction;
 use Yii;
 use yii\base\Exception;
 use yii\web\HttpException;
@@ -73,15 +71,9 @@ class Space
             Wallet::createWallet(new Event(['sender' => $spaceDefaultAccount]));
         }
 
-        $httpClient = new Client([
-            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
-            'http_errors' => false,
-            'headers' => [
-                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
-            ]
-        ]);
+        BaseCall::__init();
 
-        $response = $httpClient->request('POST', Endpoints::ENDPOINT_SPACE_ADD_MEMBER, [
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_SPACE_ADD_MEMBER, [
             RequestOptions::JSON => [
                 'accountId' => $spaceDefaultAccount->guid,
                 'dao' => $space->dao_address,
@@ -122,15 +114,9 @@ class Space
             'space_id' => null
         ]);
 
-        $httpClient = new Client([
-            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
-            'http_errors' => false,
-            'headers' => [
-                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
-            ]
-        ]);
+        BaseCall::__init();
 
-        $response = $httpClient->request('POST', Endpoints::ENDPOINT_SPACE_LEAVE_SPACE, [
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_SPACE_LEAVE_SPACE, [
             RequestOptions::JSON => [
                 'accountId' => $userDefaultAccount->guid,
                 'dao' => $space->dao_address,
@@ -173,31 +159,27 @@ class Space
             Dao::createDao($event);
         }
 
-        // add space members to created dao
-        foreach ($space->getMemberships()->all() as $memberShip) {
+        Yii::$app->queue->delay(Utils::DELAY_1_MINUTE)->push(new CreateWallets(['spaceId' => $space->id]));
+    }
 
-            $memberShipEvent = new MemberEvent([
-                'space' => $space, 'user' => $memberShip->getUser()->one()
-            ]);
-
-            self::addMember($memberShipEvent);
+    /**
+     * @param $space
+     * @throws GuzzleException
+     */
+    public static function migrate($space)
+    {
+        if (!is_array($space)) {
+            return;
         }
 
-        $asset = Utils::issueSpaceAsset($space);
+        BaseCall::__init();
 
-        $transactions = Transaction::findAll([
-            'asset_id' => $asset->id,
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_SPACE_MIGRATE, [
+            RequestOptions::JSON => $space
         ]);
 
-        foreach ($transactions as $transaction) {
-            $transactionEvent = new Event(['sender' => $transaction]);
-            if ($transaction->transaction_type == Transaction::TRANSACTION_TYPE_ISSUE) {
-                // mint coins for each issue transaction of the space
-                Coin::mintCoin($transactionEvent);
-            } else {
-                //transfer coins for each coin holder
-                Coin::transferCoin($transactionEvent);
-            }
+        if ($response->getStatusCode() != HttpStatus::CREATED) {
+           Yii::error("error migrating when migrating space : {$response->getBody()}", 'cron');
         }
     }
 }

@@ -26,8 +26,18 @@ class Utils
     const COIN_SUFFIX = 'Coin';
     const COIN_DECIMALS = 18;
 
+    const DELAY_1_MINUTE = 1 * 60;
+    const DELAY_2_MINUTES = 2 * 60;
+    const DELAY_3_MINUTES = 3 * 60;
+    const DELAY_4_MINUTES = 4 * 60;
+    const DELAY_5_MINUTES = 5 * 60;
+
     public static function getCapitalizedSpaceName($spaceName)
     {
+        if (preg_match('/coin$/', strtolower($spaceName))) {
+            return ucwords($spaceName);
+        }
+
         return ucwords($spaceName) . ' ' . self::COIN_SUFFIX;
     }
 

@@ -10,14 +10,12 @@
 
 namespace humhub\modules\ethereum\calls;
 
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use humhub\modules\ethereum\component\HttpStatus;
 use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
 use humhub\modules\xcoin\models\Account;
-use Yii;
 use yii\base\Exception;
 
 /**
@@ -42,27 +40,47 @@ class Wallet
             Utils::generateAccountGuid($account);
         }
 
-        $httpClient = new Client([
-            'base_uri' => Endpoints::ENDPOINT_BASE_URI,
-            'http_errors' => false,
-            'headers' => [
-                'Authorization' => "Basic ". base64_encode(Yii::$app->params['apiCredentials'])
-            ]
-        ]);
+        BaseCall::__init();
 
-        $response = $httpClient->request('POST', Endpoints::ENDPOINT_WALLET, [
-            RequestOptions::JSON => ['accountId' => $account->guid]
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_WALLET, [
+            RequestOptions::JSON => ['accountsIds' => [$account->guid]]
         ]);
 
         if ($response->getStatusCode() == HttpStatus::CREATED) {
             $body = json_decode($response->getBody()->getContents());
-            $account->updateAttributes(['ethereum_address' => $body->address]);
-            $account->mnemonic = $body->mnemonic;
+            $account->updateAttributes(['ethereum_address' => reset($body)->address]);
         } else {
             $account->addError(
                 'ethereum_address',
                 "Sorry, we're facing some problems while creating you're ethereum wallet. We will fix this ASAP !"
             );
+        }
+    }
+
+    /**
+     * @param array $accountsGuids
+     * @throws GuzzleException
+     */
+    public static function createWallets(array $accountsGuids)
+    {
+        if (!is_array($accountsGuids)) {
+            return;
+        }
+
+        BaseCall::__init();
+
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_WALLET, [
+            RequestOptions::JSON => ['accountsIds' => $accountsGuids]
+        ]);
+
+        if ($response->getStatusCode() == HttpStatus::CREATED) {
+            $wallets = json_decode($response->getBody()->getContents());
+            foreach ($wallets as $wallet) {
+                $account = Account::findOne(['guid' => $wallet->accountId]);
+                if ($account) {
+                    $account->updateAttributes(['ethereum_address' => $wallet->address]);
+                }
+            }
         }
     }
 }
