@@ -51,11 +51,17 @@ class CreateWallets extends ActiveJob
 
         foreach ($space->getMemberships()->all() as $memberShip) {
 
+            $user = $memberShip->getUser()->one();
+
             $defaultAccount = Account::findOne([
-                'user_id' => $memberShip->getUser()->one()->id,
+                'user_id' => $user->id,
                 'account_type' => Account::TYPE_DEFAULT,
                 'space_id' => null
             ]);
+
+            if (!$defaultAccount) {
+                Utils::createDefaultAccount($user);
+            }
 
             if (!$defaultAccount->guid) {
                 Utils::generateAccountGuid($defaultAccount);
