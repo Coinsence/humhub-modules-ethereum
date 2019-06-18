@@ -97,33 +97,37 @@ class CreateWallets extends ActiveJob
             }
         }
 
+        $isWalletCallDone = false;
+
         try {
             // create wallet only for accounts without eth_address
-            Wallet::createWallets(array_column(array_filter($accounts, function ($account) {
+            $isWalletCallDone = Wallet::createWallets(array_column(array_filter($accounts, function ($account) {
                 return empty($account['address']);
             }), 'accountId'));
         } catch (\Exception $exception) {
             Yii::warning("Exception when creating wallets for space {$space->name} : {$exception->getMessage()}", 'cron');
         }
 
-        // update eth_address for accounts without eth_address
-        $accounts = array_map(function (&$element) {
-            if (empty($element['address'])) {
-                $account = Account::findOne(['guid' => $element['accountId']]);
-                $element['address'] = $account->ethereum_address;
-            }
+        if ($isWalletCallDone) {
+            // update eth_address for accounts without eth_address
+            $accounts = array_map(function (&$element) {
+                if (empty($element['address'])) {
+                    $account = Account::findOne(['guid' => $element['accountId']]);
+                    $element['address'] = $account->ethereum_address;
+                }
 
-            return $element;
-        }, $accounts);
+                return $element;
+            }, $accounts);
 
-        // push new entry in queue for migrating space (add members & minting coins)
-        Yii::$app->queue->delay(Utils::DELAY_1_MINUTE)->push(new MigrateSpace([
-            'spaceId' => $space->id,
-            'data' => [
-                'dao' => $space->dao_address,
-                'accountId' => $spaceDefaultAccount->guid,
-                'accounts' => $accounts
-            ]
-        ]));
+            // push new entry in queue for migrating space (add members & minting coins)
+            Yii::$app->queue->delay(Utils::DELAY_1_MINUTE)->push(new MigrateSpace([
+                'spaceId' => $space->id,
+                'data' => [
+                    'dao' => $space->dao_address,
+                    'accountId' => $spaceDefaultAccount->guid,
+                    'accounts' => $accounts
+                ]
+            ]));
+        }
     }
 }
