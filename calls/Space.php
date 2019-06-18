@@ -55,7 +55,7 @@ class Space
         ]);
 
         if (!$userDefaultAccount) {
-            Utils::createDefaultAccount($member);
+            $userDefaultAccount = Utils::createDefaultAccount($member);
         } elseif (!$userDefaultAccount->ethereum_address) {
             Wallet::createWallet(new Event(['sender' => $userDefaultAccount]));
         }
@@ -66,7 +66,7 @@ class Space
         ]);
 
         if (!$spaceDefaultAccount) {
-            Utils::createDefaultAccount($space);
+            $spaceDefaultAccount = Utils::createDefaultAccount($space);
         } elseif (!$spaceDefaultAccount->ethereum_address) {
             Wallet::createWallet(new Event(['sender' => $spaceDefaultAccount]));
         }

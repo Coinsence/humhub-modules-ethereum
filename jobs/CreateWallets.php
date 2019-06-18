@@ -60,7 +60,7 @@ class CreateWallets extends ActiveJob
             ]);
 
             if (!$defaultAccount) {
-                Utils::createDefaultAccount($user);
+                $defaultAccount = Utils::createDefaultAccount($user);
             }
 
             if (!$defaultAccount->guid) {

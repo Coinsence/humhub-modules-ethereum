@@ -69,12 +69,16 @@ class Utils
             $account->save();
 
             Event::trigger(Account::class, Account::EVENT_DEFAULT_SPACE_ACCOUNT_CREATED, new Event(['sender' => $entity]));
+
+            return $account;
         } else {
             $account = new Account();
             $account->title = 'Default';
             $account->user_id = $entity->id;
             $account->account_type = Account::TYPE_DEFAULT;
             $account->save();
+
+            return $account;
         }
     }
 
