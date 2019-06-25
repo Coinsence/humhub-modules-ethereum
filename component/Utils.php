@@ -58,7 +58,7 @@ class Utils
         return str_pad('0x', 66, "0", STR_PAD_RIGHT);
     }
 
-    public static function createDefaultAccount($entity)
+    public static function createDefaultAccount($entity, $runValidation = true)
     {
         if ($entity instanceof Space) {
 
@@ -66,15 +66,19 @@ class Utils
             $account->title = 'Default';
             $account->space_id = $entity->id;
             $account->account_type = Account::TYPE_DEFAULT;
-            $account->save();
+            $account->save($runValidation);
 
             Event::trigger(Account::class, Account::EVENT_DEFAULT_SPACE_ACCOUNT_CREATED, new Event(['sender' => $entity]));
+
+            return $account;
         } else {
             $account = new Account();
             $account->title = 'Default';
             $account->user_id = $entity->id;
             $account->account_type = Account::TYPE_DEFAULT;
-            $account->save();
+            $account->save($runValidation);
+
+            return $account;
         }
     }
 

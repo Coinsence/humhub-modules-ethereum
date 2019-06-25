@@ -59,6 +59,7 @@ class Wallet
 
     /**
      * @param array $accountsGuids
+     * @return bool|void
      * @throws GuzzleException
      */
     public static function createWallets(array $accountsGuids)
@@ -81,6 +82,10 @@ class Wallet
                     $account->updateAttributes(['ethereum_address' => $wallet->address]);
                 }
             }
+
+            return true;
         }
+
+        return false;
     }
 }
