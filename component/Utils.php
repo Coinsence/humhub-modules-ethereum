@@ -26,11 +26,12 @@ class Utils
     const COIN_SUFFIX = 'Coin';
     const COIN_DECIMALS = 18;
 
-    const DELAY_1_MINUTE = 1 * 60;
-    const DELAY_2_MINUTES = 2 * 60;
-    const DELAY_3_MINUTES = 3 * 60;
-    const DELAY_4_MINUTES = 4 * 60;
-    const DELAY_5_MINUTES = 5 * 60;
+    const DELAY_HALF_MINUTE = 60 / 2;
+    const DELAY_ONE_MINUTE = 60 * 1;
+    const DELAY_TWO_MINUTES = 60 * 2;
+    const DELAY_THREE_MINUTES = 60 * 3;
+    const DELAY_FOUR_MINUTES = 60 * 4;
+    const DELAY_FIVE_MINUTES = 60 * 5;
 
     public static function getCapitalizedSpaceName($spaceName)
     {

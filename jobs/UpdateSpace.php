@@ -10,12 +10,13 @@
 namespace humhub\modules\ethereum\jobs;
 
 use GuzzleHttp\Exception\GuzzleException;
-use humhub\modules\ethereum\calls\Space;
+use humhub\modules\ethereum\calls\Dao;
 use humhub\modules\space\models\Space as BaseSpace;
 use humhub\modules\queue\ActiveJob;
+use humhub\modules\xcoin\models\Account;
 use Yii;
 
-class MigrateSpace extends ActiveJob
+class UpdateSpace extends ActiveJob
 {
     /**
      * @var int the space Id
@@ -23,32 +24,29 @@ class MigrateSpace extends ActiveJob
     public $spaceId;
 
     /**
-     * @var array the space data to migrate on ethereum
+     * @var int the space default account Guid
      */
-    public $data;
+    public $accountGuid;
 
     /**
-     * Add space members to DAO & Mint coins
-     *
+     * Update space dao address & coin address
      * @throws GuzzleException
      */
     public function run()
     {
-        Yii::warning($this->data, 'cron');
         $space = BaseSpace::findOne(['id' => $this->spaceId]);
+        $account = Account::findOne(['guid' => $this->accountGuid]);
 
-        if ($space == null or !is_array($this->data)) {
+        if ($space == null) {
             return;
         }
 
         try {
-            Space::migrate($this->data);
+            Dao::getDetails($space->id, $account->guid);
         } catch (\Exception $exception) {
-            Yii::warning("Exception when migrating space {$space->name} : {$exception->getMessage()}", 'cron');
+            Yii::warning("Exception when updating space {$space->name} details : {$exception->getMessage()}", 'cron');
         }
 
-        $space->updateAttributes(['eth_status' => BaseSpace::ETHEREUM_STATUS_ENABLED]);
-
-        Yii::warning("Ethereum enabling success for space : {$space->name}", 'cron');
+        Yii::warning("Space {$space->name} details updated successfully", 'cron');
     }
 }
