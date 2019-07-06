@@ -34,7 +34,6 @@ class MigrateSpace extends ActiveJob
      */
     public function run()
     {
-        Yii::warning($this->data, 'cron');
         $space = BaseSpace::findOne(['id' => $this->spaceId]);
 
         if ($space == null or !is_array($this->data)) {
