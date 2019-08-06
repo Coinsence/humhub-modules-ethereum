@@ -43,6 +43,11 @@ class Coin
 
         $asset = Asset::findOne(['id' => $transaction->asset_id]);
         $space = Space::findOne(['id' => $asset->space_id]);
+
+        if (!$space->dao_address) {
+            return;
+        }
+        
         $recipientAccount = Account::findOne(['id' => $transaction->to_account_id,]);
         $defaultAccount = Account::findOne([
             'space_id' => $space->id,
@@ -84,6 +89,10 @@ class Coin
 
         $asset = Asset::findOne(['id' => $transaction->asset_id]);
         $space = Space::findOne(['id' => $asset->space_id]);
+
+        if (!$space->dao_address) {
+            return;
+        }
 
         $recipientAccount = Account::findOne(['id' => $transaction->to_account_id,]);
         if (!$recipientAccount->ethereum_address) {
