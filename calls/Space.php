@@ -185,6 +185,12 @@ class Space
         }
     }
 
+    /**
+     * @param $event
+     * @throws Exception
+     * @throws GuzzleException
+     * @throws HttpException
+     */
     public static function migrateMissingTransactions($event)
     {
         $space = $event->sender;
@@ -199,10 +205,16 @@ class Space
 
         $asset = Asset::findOne(['space_id' => $space->id]);
 
-        $transactions = Transaction::findAll(['asset_id' => $asset->id, 'eth_hash' => null]);
+        $transactions = Transaction::find()
+            ->where(['asset_id' => $asset->id, 'eth_hash' => null])
+            ->andWhere([
+                'or',
+                'transaction_type =' . Transaction::TRANSACTION_TYPE_TRANSFER,
+                'transaction_type =' . Transaction::TRANSACTION_TYPE_TASK_PAYMENT,
+            ]);
 
         foreach ($transactions as $transaction) {
-            Event::trigger(Transaction::class, Transaction::EVENT_TRANSACTION_TYPE_TRANSFER, new Event(['sender' => $transaction]));
+            Coin::transferCoin(new Event(['sender' => $transaction]));
         }
     }
 }

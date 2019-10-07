@@ -95,12 +95,12 @@ class Coin
         }
 
         $recipientAccount = Account::findOne(['id' => $transaction->to_account_id,]);
-        if (!$recipientAccount->ethereum_address) {
+        if ($recipientAccount->account_type != Account::TYPE_ISSUE & !$recipientAccount->ethereum_address) {
             Wallet::createWallet(new Event(['sender' => $recipientAccount]));
         }
 
         $senderAccount = Account::findOne([$transaction->from_account_id,]);
-        if (!$senderAccount->ethereum_address) {
+        if ($senderAccount->account_type != Account::TYPE_ISSUE && !$senderAccount->ethereum_address) {
             Wallet::createWallet(new Event(['sender' => $senderAccount]));
         }
 
