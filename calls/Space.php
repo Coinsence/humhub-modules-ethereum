@@ -211,7 +211,7 @@ class Space
                 'or',
                 'transaction_type =' . Transaction::TRANSACTION_TYPE_TRANSFER,
                 'transaction_type =' . Transaction::TRANSACTION_TYPE_TASK_PAYMENT,
-            ]);
+            ])->all();
 
         foreach ($transactions as $transaction) {
             Coin::transferCoin(new Event(['sender' => $transaction]));

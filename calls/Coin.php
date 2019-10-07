@@ -47,7 +47,7 @@ class Coin
         if (!$space->dao_address) {
             return;
         }
-        
+
         $recipientAccount = Account::findOne(['id' => $transaction->to_account_id,]);
         $defaultAccount = Account::findOne([
             'space_id' => $space->id,
@@ -95,12 +95,18 @@ class Coin
         }
 
         $recipientAccount = Account::findOne(['id' => $transaction->to_account_id,]);
-        if ($recipientAccount->account_type != Account::TYPE_ISSUE & !$recipientAccount->ethereum_address) {
+        $senderAccount = Account::findOne([$transaction->from_account_id,]);
+
+        if ($recipientAccount->account_type == Account::TYPE_ISSUE || $senderAccount->account_type == Account::TYPE_ISSUE) {
+            return;
+        }
+
+        if (!$recipientAccount->ethereum_address) {
             Wallet::createWallet(new Event(['sender' => $recipientAccount]));
         }
 
-        $senderAccount = Account::findOne([$transaction->from_account_id,]);
-        if ($senderAccount->account_type != Account::TYPE_ISSUE && !$senderAccount->ethereum_address) {
+
+        if (!$senderAccount->ethereum_address) {
             Wallet::createWallet(new Event(['sender' => $senderAccount]));
         }
 
