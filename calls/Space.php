@@ -19,6 +19,8 @@ use humhub\modules\ethereum\jobs\CreateWallets;
 use humhub\modules\user\models\User;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\space\models\Space as BaseSpace;
+use humhub\modules\xcoin\models\Asset;
+use humhub\modules\xcoin\models\Transaction;
 use Yii;
 use yii\base\Exception;
 use yii\web\HttpException;
@@ -179,7 +181,28 @@ class Space
         ]);
 
         if ($response->getStatusCode() != HttpStatus::CREATED) {
-           Yii::error("error migrating when migrating space : {$response->getBody()}", 'cron');
+            Yii::error("error migrating when migrating space : {$response->getBody()}", 'cron');
+        }
+    }
+
+    public static function migrateMissingTransactions($event)
+    {
+        $space = $event->space;
+
+        if (
+            !$space instanceof BaseSpace ||
+            !$space->isModuleEnabled('xcoin') ||
+            $space->id == 1 // space with id = 1 is "Welcome Space" (this is the best way to check since it's the first space automatically created)
+        ) {
+            return;
+        }
+
+        $asset = Asset::findOne(['space_id' => $space->id]);
+
+        $transactions = Transaction::findAll(['asset_id' => $asset->id, 'eth_hash' => null]);
+
+        foreach ($transactions as $transaction) {
+            Event::trigger(Transaction::class, Transaction::EVENT_TRANSACTION_TYPE_TRANSFER, new Event(['sender' => $transaction]));
         }
     }
 }
