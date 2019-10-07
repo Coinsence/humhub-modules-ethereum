@@ -187,7 +187,7 @@ class Space
 
     public static function migrateMissingTransactions($event)
     {
-        $space = $event->space;
+        $space = $event->sender;
 
         if (
             !$space instanceof BaseSpace ||
