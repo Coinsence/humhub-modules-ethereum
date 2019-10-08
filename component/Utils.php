@@ -33,6 +33,8 @@ class Utils
     const DELAY_FOUR_MINUTES = 60 * 4;
     const DELAY_FIVE_MINUTES = 60 * 5;
 
+    const REQUEST_DELAY = 10; // wait 10 seconds after requests specially with POST /wallet that need to be funded with 0.1 eth
+
     public static function getCapitalizedSpaceName($spaceName)
     {
         if (preg_match('/coin$/', strtolower($spaceName))) {

@@ -14,6 +14,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use humhub\components\Event;
 use humhub\modules\ethereum\component\HttpStatus;
+use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
 use humhub\modules\space\models\Space;
 use humhub\modules\xcoin\models\Account;
@@ -103,11 +104,13 @@ class Coin
 
         if (!$recipientAccount->ethereum_address) {
             Wallet::createWallet(new Event(['sender' => $recipientAccount]));
+            sleep(Utils::REQUEST_DELAY);
         }
 
 
         if (!$senderAccount->ethereum_address) {
             Wallet::createWallet(new Event(['sender' => $senderAccount]));
+            sleep(Utils::REQUEST_DELAY);
         }
 
         BaseCall::__init();
