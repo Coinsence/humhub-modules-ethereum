@@ -19,6 +19,8 @@ use humhub\modules\ethereum\jobs\CreateWallets;
 use humhub\modules\user\models\User;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\space\models\Space as BaseSpace;
+use humhub\modules\xcoin\models\Asset;
+use humhub\modules\xcoin\models\Transaction;
 use Yii;
 use yii\base\Exception;
 use yii\web\HttpException;
@@ -39,12 +41,7 @@ class Space
         $space = $event->space;
         $member = $event->user;
 
-        if (
-            !$space instanceof BaseSpace ||
-            !$member instanceof User ||
-            !$space->isModuleEnabled('xcoin') ||
-            $space->id == 1 // space with id = 1 is "Welcome Space" (this is the best way to check since it's the first space automatically created)
-        ) {
+        if (!Utils::isSpaceEnabled($space) || !$member instanceof User) {
             return;
         }
 
@@ -99,12 +96,7 @@ class Space
         $space = $event->space;
         $member = $event->user;
 
-        if (
-            !$space instanceof BaseSpace ||
-            !$member instanceof User ||
-            !$space->isModuleEnabled('xcoin') ||
-            $space->id == 1 // space with id = 1 is "Welcome Space" (this is the best way to check since it's the first space automatically created)
-        ) {
+        if (!Utils::isSpaceEnabled($space) || !$member instanceof User) {
             return;
         }
 
@@ -143,7 +135,7 @@ class Space
     {
         $space = $event->sender;
 
-        if (!$space instanceof BaseSpace) {
+        if (!Utils::isSpaceEnabled($space)) {
             return;
         }
 
@@ -179,7 +171,96 @@ class Space
         ]);
 
         if ($response->getStatusCode() != HttpStatus::CREATED) {
-           Yii::error("error migrating when migrating space : {$response->getBody()}", 'cron');
+            Yii::error("error migrating when migrating space : {$response->getBody()}", 'cron');
+        }
+    }
+
+    /**
+     * @param $event
+     * @throws Exception
+     * @throws GuzzleException
+     * @throws HttpException
+     */
+    public static function migrateMissingTransactions($event)
+    {
+        $space = $event->sender;
+
+        if (!Utils::isSpaceEnabled($space)) {
+            return;
+        }
+
+        $asset = Asset::findOne(['space_id' => $space->id]);
+
+        $transactions = Transaction::find()
+            ->where(['asset_id' => $asset->id, 'eth_hash' => null])
+            ->andWhere([
+                'or',
+                'transaction_type =' . Transaction::TRANSACTION_TYPE_TRANSFER,
+                'transaction_type =' . Transaction::TRANSACTION_TYPE_TASK_PAYMENT,
+            ])
+            ->orderBy(['created_at' => SORT_ASC])
+            ->all();
+
+        foreach ($transactions as $transaction) {
+            Coin::transferCoin(new Event(['sender' => $transaction]));
+        }
+    }
+
+    /**
+     * @param $event
+     * @throws GuzzleException
+     * @throws Exception
+     */
+    public static function synchronizeBalances($event)
+    {
+        $space = $event->sender;
+
+        if (!Utils::isSpaceEnabled($space)) {
+            return;
+        }
+
+        $asset = Asset::findOne(['space_id' => $space->id]);
+
+        $accounts = Account::find()
+            ->where(['not', ['ethereum_address' => null]])
+            ->innerJoin('xcoin_transaction',
+                'xcoin_transaction.to_account_id = xcoin_account.id' .
+                ' or ' .
+                'xcoin_transaction.from_account_id = xcoin_account.id'
+            )
+            ->andWhere("xcoin_transaction.asset_id = {$asset->id}")
+            ->all();
+
+        foreach ($accounts as $account) {
+
+            $amount = $account->getAssetBalance($asset);
+
+            if (!$account->ethereum_address) {
+                Wallet::createWallet(new Event(['sender' => $account]));
+                sleep(Utils::REQUEST_DELAY);
+            } else {
+                // calculate amount difference to mint
+                $amount -= Coin::getBalance($account, $space);
+                sleep(Utils::REQUEST_DELAY);
+            }
+
+            //space default account
+            $spaceDefaultAccount = Account::findOne([
+                'space_id' => $space->id,
+                'account_type' => Account::TYPE_DEFAULT
+            ]);
+
+            BaseCall::__init();
+
+            BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_COIN_MINT, [
+                RequestOptions::JSON => [
+                    'accountId' => $spaceDefaultAccount->guid,
+                    'dao' => $space->dao_address,
+                    'recipient' => $account->ethereum_address,
+                    'amount' => (int)$amount,
+                ]
+            ]);
+
         }
     }
 }

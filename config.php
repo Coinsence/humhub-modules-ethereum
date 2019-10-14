@@ -54,6 +54,16 @@ return [
             'event' => 'enableEthereum',
             'callback' => ['humhub\modules\ethereum\calls\Space', 'enable']
         ],
+        [
+            'class' => EthereumController::class,
+            'event' => 'migrateMissingTransactions',
+            'callback' => ['humhub\modules\ethereum\calls\Space', 'migrateMissingTransactions']
+        ],
+        [
+            'class' => EthereumController::class,
+            'event' => 'synchronizeBalances',
+            'callback' => ['humhub\modules\ethereum\calls\Space', 'synchronizeBalances']
+        ],
     ],
 ];
 

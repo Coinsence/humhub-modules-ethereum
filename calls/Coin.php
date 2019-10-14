@@ -14,6 +14,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use humhub\components\Event;
 use humhub\modules\ethereum\component\HttpStatus;
+use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
 use humhub\modules\space\models\Space;
 use humhub\modules\xcoin\models\Account;
@@ -47,7 +48,7 @@ class Coin
         if (!$space->dao_address) {
             return;
         }
-        
+
         $recipientAccount = Account::findOne(['id' => $transaction->to_account_id,]);
         $defaultAccount = Account::findOne([
             'space_id' => $space->id,
@@ -95,13 +96,21 @@ class Coin
         }
 
         $recipientAccount = Account::findOne(['id' => $transaction->to_account_id,]);
-        if (!$recipientAccount->ethereum_address) {
-            Wallet::createWallet(new Event(['sender' => $recipientAccount]));
+        $senderAccount = Account::findOne([$transaction->from_account_id,]);
+
+        if ($recipientAccount->account_type == Account::TYPE_ISSUE || $senderAccount->account_type == Account::TYPE_ISSUE) {
+            return;
         }
 
-        $senderAccount = Account::findOne([$transaction->from_account_id,]);
+        if (!$recipientAccount->ethereum_address) {
+            Wallet::createWallet(new Event(['sender' => $recipientAccount]));
+            sleep(Utils::REQUEST_DELAY);
+        }
+
+
         if (!$senderAccount->ethereum_address) {
             Wallet::createWallet(new Event(['sender' => $senderAccount]));
+            sleep(Utils::REQUEST_DELAY);
         }
 
         BaseCall::__init();
@@ -122,6 +131,37 @@ class Coin
             throw new HttpException(
                 $response->getStatusCode(),
                 'Could not do transfer coins, will fix this ASAP !'
+            );
+        }
+    }
+
+    /**
+     * @param $account
+     * @param $space
+     * @return string
+     * @throws GuzzleException
+     * @throws HttpException
+     */
+    public static function getBalance($account, $space)
+    {
+        BaseCall::__init();
+
+        $response = BaseCall::$httpClient->request('GET', Endpoints::ENDPOINT_COIN_BALANCE, [
+            RequestOptions::JSON => [
+                'owner' => $account->ethereum_address,
+                'accountId' => $account->guid,
+                'dao' => $space->dao_address,
+            ]
+        ]);
+
+        if ($response->getStatusCode() == HttpStatus::CREATED) {
+            $body = json_decode($response->getBody()->getContents());
+
+            return hexdec($body->balance);
+        } else {
+            throw new HttpException(
+                $response->getStatusCode(),
+                'Could not get balance for giving account, will fix this ASAP !'
             );
         }
     }

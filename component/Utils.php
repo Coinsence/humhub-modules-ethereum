@@ -33,6 +33,8 @@ class Utils
     const DELAY_FOUR_MINUTES = 60 * 4;
     const DELAY_FIVE_MINUTES = 60 * 5;
 
+    const REQUEST_DELAY = 15; // wait 15 seconds after requests specially with POST /wallet that need to be funded with 0.1 eth
+
     public static function getCapitalizedSpaceName($spaceName)
     {
         if (preg_match('/coin$/', strtolower($spaceName))) {
@@ -102,5 +104,13 @@ class Utils
     public static function generateAccountGuid(Account $account)
     {
         $account->updateAttributes(['guid' => UUID::v4()]);
+    }
+
+    static function isSpaceEnabled($space)
+    {
+        return
+            $space instanceof Space &&
+            $space->isModuleEnabled('xcoin') &&
+            $space->id !== 1; // space with id = 1 is "Welcome Space" (this is the best way to check since it's the first space automatically created)
     }
 }
