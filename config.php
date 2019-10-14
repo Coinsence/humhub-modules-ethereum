@@ -59,6 +59,11 @@ return [
             'event' => 'migrateMissingTransactions',
             'callback' => ['humhub\modules\ethereum\calls\Space', 'migrateMissingTransactions']
         ],
+        [
+            'class' => EthereumController::class,
+            'event' => 'synchronizeBalances',
+            'callback' => ['humhub\modules\ethereum\calls\Space', 'synchronizeBalances']
+        ],
     ],
 ];
 

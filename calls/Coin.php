@@ -134,4 +134,35 @@ class Coin
             );
         }
     }
+
+    /**
+     * @param $account
+     * @param $space
+     * @return string
+     * @throws GuzzleException
+     * @throws HttpException
+     */
+    public static function getBalance($account, $space)
+    {
+        BaseCall::__init();
+
+        $response = BaseCall::$httpClient->request('GET', Endpoints::ENDPOINT_COIN_BALANCE, [
+            RequestOptions::JSON => [
+                'owner' => $account->ethereum_address,
+                'accountId' => $space->guid,
+                'dao' => $space->dao_address,
+            ]
+        ]);
+
+        if ($response->getStatusCode() == HttpStatus::CREATED) {
+            $body = json_decode($response->getBody()->getContents());
+
+            return hexdec($body->balance);
+        } else {
+            throw new HttpException(
+                $response->getStatusCode(),
+                'Could not get balance for giving account, will fix this ASAP !'
+            );
+        }
+    }
 }
