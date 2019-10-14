@@ -149,7 +149,7 @@ class Coin
         $response = BaseCall::$httpClient->request('GET', Endpoints::ENDPOINT_COIN_BALANCE, [
             RequestOptions::JSON => [
                 'owner' => $account->ethereum_address,
-                'accountId' => $space->guid,
+                'accountId' => $account->guid,
                 'dao' => $space->dao_address,
             ]
         ]);

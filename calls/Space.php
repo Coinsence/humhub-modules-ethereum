@@ -225,7 +225,7 @@ class Space
             ->where(['not', ['ethereum_address' => null]])
             ->innerJoin('xcoin_transaction',
                 'xcoin_transaction.to_account_id = xcoin_account.id' .
-                'or' .
+                ' or ' .
                 'xcoin_transaction.from_account_id = xcoin_account.id'
             )
             ->andWhere("xcoin_transaction.asset_id = {$asset->id}")
