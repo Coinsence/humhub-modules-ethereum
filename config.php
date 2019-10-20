@@ -9,16 +9,21 @@
 
 use humhub\modules\space\models\Membership;
 use humhub\modules\xcoin\controllers\EthereumController;
-use humhub\modules\xcoin\controllers\OverviewController;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\xcoin\models\Transaction;
 use yii\db\ActiveRecord;
+use yii\web\Application;
 
 return [
     'id' => 'ethereum',
     'class' => 'humhub\modules\ethereum\Module',
     'namespace' => 'humhub\modules\ethereum',
     'events' => [
+        [
+            'class' => Application::class,
+            'event' => Application::EVENT_BEFORE_REQUEST,
+            'callback' => ['\humhub\modules\ethereum\Events', 'onBeforeRequest']
+        ],
         [
             'class' => Account::class,
             'event' => ActiveRecord::EVENT_BEFORE_VALIDATE,

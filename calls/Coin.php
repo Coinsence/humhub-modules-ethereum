@@ -82,6 +82,7 @@ class Coin
      */
     public static function transferCoin($event)
     {
+        return ;
         $transaction = $event->sender;
 
         if (!$transaction instanceof Transaction) {
