@@ -7,6 +7,7 @@
  * @author Daly Ghaith <daly.ghaith@gmail.com>
  */
 
+use humhub\modules\ethereum\calls\Dao;
 use humhub\modules\space\models\Membership;
 use humhub\modules\xcoin\controllers\EthereumController;
 use humhub\modules\xcoin\models\Account;
@@ -68,6 +69,11 @@ return [
             'class' => EthereumController::class,
             'event' => 'synchronizeBalances',
             'callback' => ['humhub\modules\ethereum\calls\Space', 'synchronizeBalances']
+        ],
+        [
+            'class' => Dao::class,
+            'event' => 'daoCreated',
+            'callback' => ['humhub\modules\ethereum\calls\Coin', 'initTransferListener']
         ],
     ],
 ];

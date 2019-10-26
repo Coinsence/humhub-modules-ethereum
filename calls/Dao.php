@@ -12,6 +12,7 @@ namespace humhub\modules\ethereum\calls;
 
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
+use humhub\components\Event;
 use humhub\modules\ethereum\component\HttpStatus;
 use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
@@ -27,6 +28,8 @@ use yii\web\HttpException;
  */
 class Dao
 {
+    const EVENT_DAO_CREATED = 'daoCreated';
+
     /**
      * @param $event
      * @throws GuzzleException
@@ -102,6 +105,8 @@ class Dao
             $body = json_decode($response->getBody()->getContents());
             $space->updateAttributes(['dao_address' => $body->daoAddress]);
             $space->updateAttributes(['coin_address' => $body->apps[1]->proxy]);
+
+            Event::trigger(self::class, self::EVENT_DAO_CREATED, new Event(['sender' => $space]));
         } else {
             throw new HttpException($response->getStatusCode(), 'Could not update DAO details for this space, will fix this ASAP !');
         }
