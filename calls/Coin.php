@@ -82,7 +82,6 @@ class Coin
      */
     public static function transferCoin($event)
     {
-        return ;
         $transaction = $event->sender;
 
         if (!$transaction instanceof Transaction) {
@@ -168,14 +167,12 @@ class Coin
     }
 
     /**
-     * @param $event
+     * @param $space
      * @throws GuzzleException
      * @throws HttpException
      */
-    public static function initTransferListener($event)
+    public static function initTransferListener($space)
     {
-        $space = $event->space;
-
         if (!$space instanceof Space) {
             return;
         }
