@@ -113,4 +113,17 @@ class Utils
             $space->isModuleEnabled('xcoin') &&
             $space->id !== 1; // space with id = 1 is "Welcome Space" (this is the best way to check since it's the first space automatically created)
     }
+
+    static function checkRequestBody(array $keys, array $data)
+    {
+        $errors = [];
+
+        foreach ($keys as $key) {
+            if (!isset($data[$key]) && !array_key_exists($key, $data)) {
+                $errors[] = $key;
+            }
+        }
+
+        return $errors;
+    }
 }

@@ -102,6 +102,8 @@ class Dao
             $body = json_decode($response->getBody()->getContents());
             $space->updateAttributes(['dao_address' => $body->daoAddress]);
             $space->updateAttributes(['coin_address' => $body->apps[1]->proxy]);
+
+            Coin::initTransferListener($space);
         } else {
             throw new HttpException($response->getStatusCode(), 'Could not update DAO details for this space, will fix this ASAP !');
         }

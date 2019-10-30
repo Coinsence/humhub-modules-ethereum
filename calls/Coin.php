@@ -165,4 +165,37 @@ class Coin
             );
         }
     }
+
+    /**
+     * @param $space
+     * @throws GuzzleException
+     * @throws HttpException
+     */
+    public static function initTransferListener($space)
+    {
+        if (!$space instanceof Space) {
+            return;
+        }
+
+        $defaultAccount = Account::findOne([
+            'space_id' => $space->id,
+            'account_type' => Account::TYPE_DEFAULT
+        ]);
+
+        BaseCall::__init();
+
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_COIN_INIT_TRANSFER_LISTENER, [
+            RequestOptions::JSON => [
+                'accountId' => $defaultAccount->guid,
+                'dao' => $space->dao_address,
+            ]
+        ]);
+
+        if ($response->getStatusCode() != HttpStatus::CREATED) {
+            throw new HttpException(
+                $response->getStatusCode(),
+                'Could not start transfer listener for space coin, will fix this ASAP !'
+            );
+        }
+    }
 }
