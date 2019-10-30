@@ -17,6 +17,7 @@ use humhub\modules\ethereum\component\Utils;
 use humhub\modules\ethereum\Endpoints;
 use humhub\modules\xcoin\models\Account;
 use yii\base\Exception;
+use yii\web\HttpException;
 
 /**
  * Class Wallet
@@ -87,5 +88,33 @@ class Wallet
         }
 
         return false;
+    }
+
+    /**
+     * @param $account
+     * @return string
+     * @throws GuzzleException
+     * @throws HttpException
+     */
+    public static function getWallet($account)
+    {
+        BaseCall::__init();
+
+        $response = BaseCall::$httpClient->request('GET', Endpoints::ENDPOINT_WALLET, [
+            RequestOptions::JSON => [
+                'accountId' => $account->guid,
+            ]
+        ]);
+
+        if ($response->getStatusCode() == HttpStatus::CREATED) {
+            $body = json_decode($response->getBody()->getContents());
+
+            return $body->privateKey;
+        } else {
+            throw new HttpException(
+                $response->getStatusCode(),
+                'Could not get wallet PK, will fix this ASAP !'
+            );
+        }
     }
 }
