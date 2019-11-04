@@ -57,7 +57,7 @@ class Dao
                 'descHash' => Utils::getDefaultDescHash(),
                 'coinName' => $coinName,
                 'coinSymbol' => Utils::getCoinSymbol($coinName),
-                'coinDecimals' => Utils::COIN_DECIMALS
+                'coinDecimals' => (int) Utils::COIN_DECIMALS
             ]
         ]);
 
