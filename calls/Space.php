@@ -108,7 +108,7 @@ class Space
 
         BaseCall::__init();
 
-        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_SPACE_LEAVE_SPACE, [
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_SPACE_REMOVE_MEMBER, [
             RequestOptions::JSON => [
                 'accountId' => $userDefaultAccount->guid,
                 'dao' => $space->dao_address,
@@ -155,7 +155,7 @@ class Space
         if ($response->getStatusCode() != HttpStatus::CREATED) {
             throw new HttpException(
                 $response->getStatusCode(),
-                'Could not remove member from this space, will fix this ASAP !'
+                'Could not cancel membership from this space, will fix this ASAP !'
             );
         }
     }

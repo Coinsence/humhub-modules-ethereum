@@ -25,6 +25,7 @@ class Endpoints
     const ENDPOINT_COIN_BALANCE = '/coin/balance';
     const ENDPOINT_COIN_INIT_TRANSFER_LISTENER = '/coin/setTransferEventListener';
     const ENDPOINT_SPACE_ADD_MEMBER = '/space/addMembers';
+    const ENDPOINT_SPACE_REMOVE_MEMBER = '/space/removeMember';
     const ENDPOINT_SPACE_LEAVE_SPACE = '/space/leave';
     const ENDPOINT_SPACE_MIGRATE = '/migrate/space';
 }
