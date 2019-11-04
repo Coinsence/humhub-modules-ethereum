@@ -91,6 +91,43 @@ class Space
      * @throws GuzzleException
      * @throws HttpException
      */
+    public static function removeMember($event)
+    {
+        $space = $event->space;
+        $member = $event->user;
+
+        if (!Utils::isSpaceEnabled($space) || !$member instanceof User) {
+            return;
+        }
+
+        $userDefaultAccount = Account::findOne([
+            'user_id' => $member->id,
+            'account_type' => Account::TYPE_DEFAULT,
+            'space_id' => null
+        ]);
+
+        BaseCall::__init();
+
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_SPACE_LEAVE_SPACE, [
+            RequestOptions::JSON => [
+                'accountId' => $userDefaultAccount->guid,
+                'dao' => $space->dao_address,
+            ]
+        ]);
+
+        if ($response->getStatusCode() != HttpStatus::CREATED) {
+            throw new HttpException(
+                $response->getStatusCode(),
+                'Could not remove member from this space, will fix this ASAP !'
+            );
+        }
+    }
+
+    /**
+     * @param $event
+     * @throws GuzzleException
+     * @throws HttpException
+     */
     public static function leaveSpace($event)
     {
         $space = $event->space;
