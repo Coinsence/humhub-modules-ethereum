@@ -56,8 +56,8 @@ class Dao
                 'spaceName' => $space->name,
                 'descHash' => Utils::getDefaultDescHash(),
                 'coinName' => $coinName,
-                'coinSymbol' => strval(Utils::getCoinSymbol($coinName)),
-                'coinDecimals' => Utils::COIN_DECIMALS
+                'coinSymbol' => Utils::getCoinSymbol($coinName),
+                'coinDecimals' => strval(Utils::COIN_DECIMALS)
             ]
         ]);
 
