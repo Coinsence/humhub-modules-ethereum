@@ -41,7 +41,7 @@ class Space
         $space = $event->space;
         $member = $event->user;
 
-        if (!Utils::isSpaceEnabled($space) || !$member instanceof User) {
+        if (!Utils::isEthereumEnabled($space) || !$member instanceof User) {
             return;
         }
 
@@ -96,7 +96,7 @@ class Space
         $space = $event->space;
         $member = $event->user;
 
-        if (!Utils::isSpaceEnabled($space) || !$member instanceof User) {
+        if (!Utils::isEthereumEnabled($space) || !$member instanceof User) {
             return;
         }
 
@@ -133,7 +133,7 @@ class Space
         $space = $event->space;
         $member = $event->user;
 
-        if (!Utils::isSpaceEnabled($space) || !$member instanceof User) {
+        if (!Utils::isEthereumEnabled($space) || !$member instanceof User) {
             return;
         }
 
@@ -172,7 +172,7 @@ class Space
     {
         $space = $event->sender;
 
-        if (!Utils::isSpaceEnabled($space)) {
+        if (!Utils::isXcoinEnabled($space)) {
             return;
         }
 
@@ -222,7 +222,7 @@ class Space
     {
         $space = $event->sender;
 
-        if (!Utils::isSpaceEnabled($space)) {
+        if (!Utils::isEthereumEnabled($space)) {
             return;
         }
 
@@ -252,7 +252,7 @@ class Space
     {
         $space = $event->sender;
 
-        if (!Utils::isSpaceEnabled($space)) {
+        if (!Utils::isEthereumEnabled($space)) {
             return;
         }
 
