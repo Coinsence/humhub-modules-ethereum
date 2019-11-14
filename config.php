@@ -51,8 +51,13 @@ return [
         ],
         [
             'class' => Membership::class,
-            'event' => 'memberRemoved',
+            'event' => 'memberLeaved',
             'callback' => ['humhub\modules\ethereum\calls\Space', 'leaveSpace']
+        ],
+        [
+            'class' => Membership::class,
+            'event' => 'memberRemoved',
+            'callback' => ['humhub\modules\ethereum\calls\Space', 'removeMember']
         ],
         [
             'class' => EthereumController::class,

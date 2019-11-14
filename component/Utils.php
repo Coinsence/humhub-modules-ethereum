@@ -106,12 +106,17 @@ class Utils
         $account->updateAttributes(['guid' => UUID::v4()]);
     }
 
-    static function isSpaceEnabled($space)
+    static function isXcoinEnabled($space)
     {
         return
             $space instanceof Space &&
             $space->isModuleEnabled('xcoin') &&
             $space->id !== 1; // space with id = 1 is "Welcome Space" (this is the best way to check since it's the first space automatically created)
+    }
+
+    static function isEthereumEnabled($space)
+    {
+        return self::isXcoinEnabled($space) && $space->eth_status == Space::ETHEREUM_STATUS_ENABLED;
     }
 
     static function checkRequestBody(array $keys, array $data)

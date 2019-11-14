@@ -41,7 +41,7 @@ class Space
         $space = $event->space;
         $member = $event->user;
 
-        if (!Utils::isSpaceEnabled($space) || !$member instanceof User) {
+        if (!Utils::isEthereumEnabled($space) || !$member instanceof User) {
             return;
         }
 
@@ -91,12 +91,49 @@ class Space
      * @throws GuzzleException
      * @throws HttpException
      */
+    public static function removeMember($event)
+    {
+        $space = $event->space;
+        $member = $event->user;
+
+        if (!Utils::isEthereumEnabled($space) || !$member instanceof User) {
+            return;
+        }
+
+        $userDefaultAccount = Account::findOne([
+            'user_id' => $member->id,
+            'account_type' => Account::TYPE_DEFAULT,
+            'space_id' => null
+        ]);
+
+        BaseCall::__init();
+
+        $response = BaseCall::$httpClient->request('POST', Endpoints::ENDPOINT_SPACE_REMOVE_MEMBER, [
+            RequestOptions::JSON => [
+                'accountId' => $userDefaultAccount->guid,
+                'dao' => $space->dao_address,
+            ]
+        ]);
+
+        if ($response->getStatusCode() != HttpStatus::CREATED) {
+            throw new HttpException(
+                $response->getStatusCode(),
+                'Could not remove member from this space, will fix this ASAP !'
+            );
+        }
+    }
+
+    /**
+     * @param $event
+     * @throws GuzzleException
+     * @throws HttpException
+     */
     public static function leaveSpace($event)
     {
         $space = $event->space;
         $member = $event->user;
 
-        if (!Utils::isSpaceEnabled($space) || !$member instanceof User) {
+        if (!Utils::isEthereumEnabled($space) || !$member instanceof User) {
             return;
         }
 
@@ -118,7 +155,7 @@ class Space
         if ($response->getStatusCode() != HttpStatus::CREATED) {
             throw new HttpException(
                 $response->getStatusCode(),
-                'Could not remove member from this space, will fix this ASAP !'
+                'Could not cancel membership from this space, will fix this ASAP !'
             );
         }
     }
@@ -135,7 +172,7 @@ class Space
     {
         $space = $event->sender;
 
-        if (!Utils::isSpaceEnabled($space)) {
+        if (!Utils::isXcoinEnabled($space)) {
             return;
         }
 
@@ -185,7 +222,7 @@ class Space
     {
         $space = $event->sender;
 
-        if (!Utils::isSpaceEnabled($space)) {
+        if (!Utils::isEthereumEnabled($space)) {
             return;
         }
 
@@ -215,7 +252,7 @@ class Space
     {
         $space = $event->sender;
 
-        if (!Utils::isSpaceEnabled($space)) {
+        if (!Utils::isEthereumEnabled($space)) {
             return;
         }
 
