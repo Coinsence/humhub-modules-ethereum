@@ -132,8 +132,8 @@ class Utils
         return $errors;
     }
 
-    static function formatAmount($amount)
+    function formatAmount($amount)
     {
-        return number_format($amount, 1, '.', '');
+        return is_int($amount) ? number_format($amount, 1, '.', '') : $amount;
     }
 }
