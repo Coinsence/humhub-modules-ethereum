@@ -294,7 +294,7 @@ class Space
                     'accountId' => $spaceDefaultAccount->guid,
                     'dao' => $space->dao_address,
                     'recipient' => $account->ethereum_address,
-                    'amount' => (int)$amount,
+                    'amount' => Utils::formatAmount($amount),
                 ]
             ]);
 

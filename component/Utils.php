@@ -131,4 +131,9 @@ class Utils
 
         return $errors;
     }
+
+    static function formatAmount($amount)
+    {
+        return number_format($amount, 1, '.', '');
+    }
 }
