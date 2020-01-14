@@ -62,7 +62,7 @@ class Coin
                 'accountId' => $defaultAccount->guid,
                 'dao' => $space->dao_address,
                 'recipient' => $recipientAccount->ethereum_address,
-                'amount' => (int)$transaction->amount,
+                'amount' => Utils::formatAmount($transaction->amount),
             ]
         ]);
 
@@ -120,7 +120,7 @@ class Coin
                 'accountId' => $senderAccount->guid,
                 'dao' => $space->dao_address,
                 'to' => $recipientAccount->ethereum_address,
-                'amount' => (int)$transaction->amount,
+                'amount' => Utils::formatAmount($transaction->amount),
             ]
         ]);
 

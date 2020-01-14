@@ -70,7 +70,7 @@ class CreateWallets extends ActiveJob
             $accounts[] = [
                 'address' => $defaultAccount->ethereum_address,
                 'accountId' => $defaultAccount->guid,
-                'balance' => (int)$defaultAccount->getAssetBalance($asset),
+                'balance' => Utils::formatAmount($defaultAccount->getAssetBalance($asset)),
                 'isMember' => true
             ];
         }
@@ -91,7 +91,7 @@ class CreateWallets extends ActiveJob
                 $accounts[] = [
                     'address' => $account->ethereum_address,
                     'accountId' => $account->guid,
-                    'balance' => (int)$account->getAssetBalance($asset),
+                    'balance' => Utils::formatAmount($account->getAssetBalance($asset)),
                     'isMember' => false
                 ];
             }
