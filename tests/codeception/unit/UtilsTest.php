@@ -83,7 +83,7 @@ class UtilsTest extends HumHubDbTestCase
     public function testIssueSpaceAsset()
     {
 
-        $space = Space::findOne(['id' => 1]);
+        $space = Space::findOne(['id' => 4]);
 
         $asset = Utils::issueSpaceAsset($space);
 
