@@ -153,7 +153,7 @@ class UtilsTest extends HumHubDbTestCase
         $this->assertCount(0, Utils::checkRequestBody($keys, $data));
 
         $keys = ['a', 'b', 'c'];
-        $data = ['a' => 'a', 'b' => 'b', 'c' => null];
+        $data = ['a' => 'a', 'b' => 'b', 'test'];
 
 
         $this->assertCount(1, Utils::checkRequestBody($keys, $data));
