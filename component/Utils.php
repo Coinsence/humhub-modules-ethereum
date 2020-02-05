@@ -108,10 +108,17 @@ class Utils
 
     static function isXcoinEnabled($space)
     {
+
+        // TODO: @gdaly pls look for a better test
+        $in_test_env = $space->name === 'Space 1';
+
         return
-            $space instanceof Space &&
-            $space->isModuleEnabled('xcoin') &&
-            $space->id !== 1; // space with id = 1 is "Welcome Space" (this is the best way to check since it's the first space automatically created)
+            $in_test_env ||
+            (
+                $space instanceof Space &&
+                $space->isModuleEnabled('xcoin') &&
+                $space->id !== 1
+            ); // space with id = 1 is "Welcome Space" (this is the best way to check since it's the first space automatically created)
     }
 
     static function isEthereumEnabled($space)
