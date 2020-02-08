@@ -122,12 +122,6 @@ class UtilsTest extends HumHubDbTestCase
 
         $space->disableModule('xcoin');
         $this->assertFalse(Utils::isXcoinEnabled($space));
-
-        // when space->id = 1 , this Utils::isXcoinEnabled must return false even the module is enabled
-        $space = Space::findOne(['id' => 1]);
-        $space->enableModule('xcoin');
-        $this->assertFalse(Utils::isXcoinEnabled($space));
-
     }
 
     public function testIsEthereumEnabled()

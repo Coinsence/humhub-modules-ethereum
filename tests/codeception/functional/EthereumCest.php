@@ -12,9 +12,13 @@
 namespace ethereum\functional;
 
 use ethereum\FunctionalTester;
+use GuzzleHttp\Exception\GuzzleException;
 use humhub\modules\space\models\Space;
 use humhub\modules\user\models\User;
 use humhub\modules\xcoin\models\Account;
+use humhub\modules\xcoin\models\Transaction;
+use yii\base\Exception;
+use yii\web\HttpException;
 
 class EthereumCest
 {
@@ -132,6 +136,56 @@ class EthereumCest
             'DynamicModel[currentPassword]' => 'test'
         ]);
         $I->seeResponseCodeIsSuccessful();
+
+    }
+
+    /**
+     * @param FunctionalTester $I
+     * @throws GuzzleException
+     * @throws Exception
+     * @throws HttpException
+     */
+    public function testSynchronizeTransaction(FunctionalTester $I)
+    {
+
+        $I->wantTo('ensure that synchronization between ethereum and xcoin transactions works');
+
+        $I->amAdmin();
+
+        $I->enableEthereumModule();
+
+        $I->enableSpaceModule(1, 'xcoin');
+        $I->enableUserModule(1, 'xcoin');
+
+        $I->enableSpaceEthereum(1);
+
+        $space = Space::findOne(['id' => 1]);
+        $spaceDefaultAccount = Account::findOne(['id' => 1]);
+        $ownerDefaultAccount = Account::findOne(['id' => 4]);
+        $amount_to_transfer = 10.0;
+
+        $I->mintCoins($space, $amount_to_transfer);
+
+        $tx_hash = "0xe6Aaa0F6Fcd7Ef1A3bb14d5c9a90f2a5079C18DB";
+
+        $I->sendAjaxPostRequest('index.php?r=ethereum/transaction/synchronize', [
+            'fromAddress' => $spaceDefaultAccount->ethereum_address,
+            'toAddress' => $ownerDefaultAccount->ethereum_address,
+            'coinAddress' => $space->coin_address,
+            'amount' => $amount_to_transfer,
+            'txHash' => $tx_hash
+        ]);
+
+        $I->seeResponseCodeIsSuccessful();
+
+        $I->seeRecord(Transaction::class, [
+            'from_account_id' => $spaceDefaultAccount->id,
+            'to_account_id' => $ownerDefaultAccount->id,
+            'eth_hash' => $tx_hash,
+            'amount' => $amount_to_transfer,
+            'transaction_type' => Transaction::TRANSACTION_TYPE_TRANSFER,
+            'comment' => 'Mobile app transfer'
+        ]);
 
     }
 
