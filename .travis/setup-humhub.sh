@@ -20,9 +20,9 @@ grunt build-assets
 cd ${HUMHUB_PATH}/protected/humhub/tests
 
 set +v
-sed -i -e "s|'installed' => true,|'installed' => true,\n\t'moduleAutoloadPaths' => ['$(dirname $old)'],\n\t'defaultAssetName' => '$DEFAULTASSETNAME_TEST',\n\t'apiCredentials' => '$APICREDENTIALS_TEST',\n\t'ethereum_api_base_uri' => '$ETHEREUMAPIBASEURI_TEST'|g" config/common.php
+sed -i -e "s|'installed' => true,|'installed' => true,\n\t'moduleAutoloadPaths' => ['$(dirname $old)'],\n\t'defaultAssetName' => '$DEFAULTASSETNAME',\n\t'apiCredentials' => '$APICREDENTIALS',\n\t'ethereum_api_base_uri' => '$ETHEREUMAPIBASEURI'|g" config/common.php
 set -v
-cat config/common.php
+#cat config/common.php
 
 mysql -e 'CREATE DATABASE humhub_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;'
 php codeception/bin/yii migrate/up --includeModuleMigrations=1 --interactive=0
