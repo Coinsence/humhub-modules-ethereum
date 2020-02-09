@@ -13,6 +13,7 @@ namespace ethereum\functional;
 
 use ethereum\FunctionalTester;
 use GuzzleHttp\Exception\GuzzleException;
+use humhub\modules\ethereum\component\HttpStatus;
 use humhub\modules\space\models\Space;
 use humhub\modules\user\models\User;
 use humhub\modules\xcoin\models\Account;
@@ -145,7 +146,7 @@ class EthereumCest
      * @throws Exception
      * @throws HttpException
      */
-    public function testSynchronizeTransaction(FunctionalTester $I)
+    public function testSynchronizeMobileAppTransactionSuccess(FunctionalTester $I)
     {
 
         $I->wantTo('ensure that synchronization between ethereum and xcoin transactions works');
@@ -163,10 +164,9 @@ class EthereumCest
         $spaceDefaultAccount = Account::findOne(['id' => 1]);
         $ownerDefaultAccount = Account::findOne(['id' => 4]);
         $amount_to_transfer = 10.0;
+        $tx_hash = "0xe6Aaa0F6Fcd7Ef1A3bb14d5c9a90f2a5079C18DB";
 
         $I->mintCoins($space, $amount_to_transfer);
-
-        $tx_hash = "0xe6Aaa0F6Fcd7Ef1A3bb14d5c9a90f2a5079C18DB";
 
         $I->sendAjaxPostRequest('index.php?r=ethereum/transaction/synchronize', [
             'fromAddress' => $spaceDefaultAccount->ethereum_address,
@@ -189,4 +189,54 @@ class EthereumCest
 
     }
 
+    /**
+     * @param FunctionalTester $I
+     * @throws GuzzleException
+     * @throws Exception
+     * @throws HttpException
+     */
+    public function testSynchronizeMobileAppTransactionFailure(FunctionalTester $I)
+    {
+
+        $I->wantTo('ensure that synchronization between ethereum and xcoin transactions fails when given tx data is invalid');
+
+        $I->amAdmin();
+
+        $I->enableEthereumModule();
+
+        $I->enableSpaceModule(1, 'xcoin');
+        $I->enableUserModule(1, 'xcoin');
+
+        $I->enableSpaceEthereum(1);
+
+        $space = Space::findOne(['id' => 1]);
+        $spaceDefaultAccount = Account::findOne(['id' => 1]);
+        $ownerDefaultAccount = Account::findOne(['id' => 4]);
+        $amount_to_transfer = -1;
+        $tx_hash = "0xe6Aaa0F6Fcd7Ef1A3bb14d5c9a90f2a5079C18DB";
+
+        $I->mintCoins($space, $amount_to_transfer);
+
+        // try with missing body txHash param
+        $I->sendAjaxPostRequest('index.php?r=ethereum/transaction/synchronize', [
+            'fromAddress' => $spaceDefaultAccount->ethereum_address,
+            'toAddress' => $ownerDefaultAccount->ethereum_address,
+            'coinAddress' => $space->coin_address,
+            'amount' => $amount_to_transfer,
+        ]);
+
+        $I->seeResponseCodeIs(HttpStatus::BAD_REQUEST);
+
+        // try with negative amount
+        $I->sendAjaxPostRequest('index.php?r=ethereum/transaction/synchronize', [
+            'fromAddress' => $spaceDefaultAccount->ethereum_address,
+            'toAddress' => $ownerDefaultAccount->ethereum_address,
+            'coinAddress' => $space->coin_address,
+            'amount' => $amount_to_transfer,
+            'txHash' => $tx_hash
+        ]);
+
+        $I->seeResponseCodeIs(HttpStatus::FORBIDDEN);
+
+    }
 }
