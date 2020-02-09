@@ -200,7 +200,7 @@ class EthereumCest
     public function testSynchronizeMobileAppTransactionFailure(FunctionalTester $I)
     {
 
-        $I->wantTo('ensure that synchronization between ethereum and xcoin transactions fails when given tx data is invalid');
+        $I->wantTo('ensure that synchronization between ethereum and xcoin transactions fails when given invalid data');
 
         $I->amAdmin();
 
@@ -299,33 +299,4 @@ class EthereumCest
         \PHPUnit_Framework_Assert::assertTrue($success);
     }
 
-    /**
-     * @param FunctionalTester $I
-     * @throws Exception
-     * @throws GuzzleException
-     * @throws HttpException
-     */
-    public function testSpaceRemoveMember(FunctionalTester $I)
-    {
-
-        $I->wantTo('ensure that removing a member from a space works');
-
-        $I->amAdmin();
-
-        $I->enableEthereumModule();
-
-        $I->enableSpaceModule(1, 'xcoin');
-        $I->enableUserModule(1, 'xcoin');
-
-        $I->enableSpaceEthereum(1);
-
-        $space = Space::findOne(['id' => 1]);
-        $user = User::findOne(['id' => 3]);
-
-        $success = SpaceCalls::addMember(new MemberEvent(['space' => $space, 'user' => $user]));
-        \PHPUnit_Framework_Assert::assertTrue($success);
-
-        $success = SpaceCalls::removeMember(new MemberEvent(['space' => $space, 'user' => $user]));
-        \PHPUnit_Framework_Assert::assertTrue($success);
-    }
 }
