@@ -32,6 +32,7 @@ class Space
 {
     /**
      * @param $event
+     * @return bool|void
      * @throws GuzzleException
      * @throws HttpException
      * @throws Exception
@@ -84,10 +85,13 @@ class Space
                 'Could not add member to this space, will fix this ASAP !'
             );
         }
+
+        return true;
     }
 
     /**
      * @param $event
+     * @return bool|void
      * @throws GuzzleException
      * @throws HttpException
      */
@@ -121,10 +125,13 @@ class Space
                 'Could not remove member from this space, will fix this ASAP !'
             );
         }
+
+        return true;
     }
 
     /**
      * @param $event
+     * @return bool|void
      * @throws GuzzleException
      * @throws HttpException
      */
@@ -158,6 +165,8 @@ class Space
                 'Could not cancel membership from this space, will fix this ASAP !'
             );
         }
+
+        return true;
     }
 
     /**

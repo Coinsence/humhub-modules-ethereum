@@ -14,7 +14,9 @@ namespace ethereum\functional;
 use ethereum\FunctionalTester;
 use GuzzleHttp\Exception\GuzzleException;
 use humhub\modules\ethereum\component\HttpStatus;
+use humhub\modules\space\MemberEvent;
 use humhub\modules\space\models\Space;
+use humhub\modules\ethereum\calls\Space as SpaceCalls;
 use humhub\modules\user\models\User;
 use humhub\modules\xcoin\models\Account;
 use humhub\modules\xcoin\models\Transaction;
@@ -238,5 +240,92 @@ class EthereumCest
 
         $I->seeResponseCodeIs(HttpStatus::FORBIDDEN);
 
+    }
+
+    /**
+     * @param FunctionalTester $I
+     * @throws Exception
+     * @throws GuzzleException
+     * @throws HttpException
+     */
+    public function testSpaceAddMember(FunctionalTester $I)
+    {
+
+        $I->wantTo('ensure that adding a member to a space works');
+
+        $I->amAdmin();
+
+        $I->enableEthereumModule();
+
+        $I->enableSpaceModule(1, 'xcoin');
+        $I->enableUserModule(1, 'xcoin');
+
+        $I->enableSpaceEthereum(1);
+
+        $space = Space::findOne(['id' => 1]);
+        $user = User::findOne(['id' => 3]);
+
+        $success = SpaceCalls::addMember(new MemberEvent(['space' => $space, 'user' => $user]));
+        \PHPUnit_Framework_Assert::assertTrue($success);
+    }
+
+    /**
+     * @param FunctionalTester $I
+     * @throws Exception
+     * @throws GuzzleException
+     * @throws HttpException
+     */
+    public function testSpaceLeaveMember(FunctionalTester $I)
+    {
+
+        $I->wantTo('ensure that when a member leaves a space works');
+
+        $I->amAdmin();
+
+        $I->enableEthereumModule();
+
+        $I->enableSpaceModule(1, 'xcoin');
+        $I->enableUserModule(1, 'xcoin');
+
+        $I->enableSpaceEthereum(1);
+
+        $space = Space::findOne(['id' => 1]);
+        $user = User::findOne(['id' => 3]);
+
+        $success = SpaceCalls::addMember(new MemberEvent(['space' => $space, 'user' => $user]));
+        \PHPUnit_Framework_Assert::assertTrue($success);
+
+        $success = SpaceCalls::leaveSpace(new MemberEvent(['space' => $space, 'user' => $user]));
+        \PHPUnit_Framework_Assert::assertTrue($success);
+    }
+
+    /**
+     * @param FunctionalTester $I
+     * @throws Exception
+     * @throws GuzzleException
+     * @throws HttpException
+     */
+    public function testSpaceRemoveMember(FunctionalTester $I)
+    {
+
+        $I->wantTo('ensure that removing a member from a space works');
+
+        $I->amAdmin();
+
+        $I->enableEthereumModule();
+
+        $I->enableSpaceModule(1, 'xcoin');
+        $I->enableUserModule(1, 'xcoin');
+
+        $I->enableSpaceEthereum(1);
+
+        $space = Space::findOne(['id' => 1]);
+        $user = User::findOne(['id' => 3]);
+
+        $success = SpaceCalls::addMember(new MemberEvent(['space' => $space, 'user' => $user]));
+        \PHPUnit_Framework_Assert::assertTrue($success);
+
+        $success = SpaceCalls::removeMember(new MemberEvent(['space' => $space, 'user' => $user]));
+        \PHPUnit_Framework_Assert::assertTrue($success);
     }
 }
