@@ -1,4 +1,4 @@
-# Ethereum Module ![GitHub](https://img.shields.io/github/license/Coinsence/coinsence-monorepo.svg)
+# Ethereum Module ![GitHub](https://img.shields.io/github/license/Coinsence/coinsence-monorepo.svg) [![Build Status](https://travis-ci.org/Coinsence/humhub-modules-ethereum.svg?branch=master)](https://travis-ci.org/Coinsence/humhub-modules-ethereum) [![Coverage Status](https://coveralls.io/repos/github/Coinsence/humhub-modules-ethereum/badge.svg?branch=master)](https://coveralls.io/github/Coinsence/humhub-modules-ethereum?branch=master)
 
 
 Ethereum module ensure smart contracts integration with [humhub-modules-xcoin](https://github.com/Coinsence/humhub-modules-xcoin).
