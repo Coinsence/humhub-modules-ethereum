@@ -72,7 +72,7 @@ class TransactionController extends BaseRestController
         $transaction->to_account_id = $toAccount->id;
         $transaction->asset_id = (Asset::findOne(['space_id' => $space->id]))->id;
         $transaction->eth_hash = $transactionData['txHash'];
-        $transaction->amount = (int)$transactionData['amount'];
+        $transaction->amount = (float)$transactionData['amount'];
         $transaction->transaction_type = Transaction::TRANSACTION_TYPE_TRANSFER;
         $transaction->comment = 'Mobile app transfer';
 
