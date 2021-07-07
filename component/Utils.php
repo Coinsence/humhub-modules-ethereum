@@ -111,7 +111,7 @@ class Utils
         return
             $space instanceof Space &&
             $space->isModuleEnabled('xcoin') &&
-            $space->id !== 1; // space with id = 1 is "Welcome Space" (this is the best way to check since it's the first space automatically created)
+            ($space->id !== 1 || YII_ENV === 'test'); // space with id = 1 is "Welcome Space" (this is the best way to check since it's the first space automatically created) , skip if test env
     }
 
     static function isEthereumEnabled($space)
